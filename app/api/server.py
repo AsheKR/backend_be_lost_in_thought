@@ -6,6 +6,7 @@ from api.exception import APIException, APIExceptionSchema
 from api.router.answer.router import answer_detail_router, answer_router
 from api.router.auth.router import auth_router
 from api.router.delete.router import delete_all_router
+from api.router.health.router import health_check_router
 from api.router.question.router import question_router
 from api.router.question.string import QuestionEndPoint
 from api.router.version.router import version_router
@@ -36,6 +37,7 @@ def _init_router(fast_api_: FastAPI) -> None:
     fast_api_.include_router(answer_detail_router, prefix=RootEndPoint.answer)
     fast_api_.include_router(delete_all_router, prefix=RootEndPoint.delete_all)
     fast_api_.include_router(version_router, prefix=RootEndPoint.version)
+    fast_api_.include_router(health_check_router, prefix=RootEndPoint.health_check)
 
 
 def _init_listener(fast_api_: FastAPI) -> None:

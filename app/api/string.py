@@ -9,6 +9,7 @@ class RootEndPoint(StrEnum):
     answer = "/answer"
     delete_all = "/delete-all"
     version = "/can-update"
+    health_check = "/health-check"
 
 
 class APIDocString(StrEnum):
