@@ -14,7 +14,7 @@ class QuestionRepository(BaseRepository):
         query = (
             select(AnswerModel)
             .join(QuestionModel)
-            .where(AnswerModel.user_id == user_id)
+            .where(AnswerModel.delete_datetime == None, AnswerModel.user_id == user_id,)
             .order_by(AnswerModel.id)
             .limit(limit=limit)
             .offset(offset=offset)
@@ -36,6 +36,9 @@ class QuestionRepository(BaseRepository):
             select(  # type: ignore
                 QuestionModel,
                 coalesce(suggested_subquery.c.suggested_count, 0).label("suggested_count"),
+            )
+            .where(
+                QuestionModel.delete_datetime == None,
             )
             .outerjoin(
                 suggested_subquery,

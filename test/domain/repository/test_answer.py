@@ -1,3 +1,4 @@
+from datetime import datetime
 from assertpy import assert_that
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
@@ -93,6 +94,50 @@ async def test_answer_pagination(session: AsyncSession):
     assert_that(answer_list).is_length(0)
 
 
+async def test_answer_list_exclude_deleted(session: AsyncSession):
+    answer_repository = AnswerRepository(session=session)
+    question_model = QuestionModel()
+    user_model = UserModel()
+    session.add_all(
+        instances=[
+            question_model,
+            user_model,
+        ],
+    )
+    await session.flush()
+    answer_model1 = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    answer_model2 = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    answer_model3 = AnswerModel(
+        question=question_model,
+        user=user_model,
+        delete_datetime=datetime.now(),
+    )
+    session.add_all(
+        instances=[
+            answer_model1,
+            answer_model2,
+            answer_model3,
+        ]
+    )
+    await session.commit()
+
+    answer_list = await answer_repository.list(
+        question_external_id=question_model.external_id,
+        user_id=user_model.id,
+        limit=3,
+        offset=0,
+    )
+    assert_that(answer_list).is_length(2)
+    assert_that(answer_list[0].id).is_equal_to(answer_model1.id)
+    assert_that(answer_list[1].id).is_equal_to(answer_model2.id)
+
+
 async def test_add(session: AsyncSession):
     answer_repository = AnswerRepository(session=session)
     user_model = UserModel()
@@ -170,4 +215,5 @@ async def test_delete(session: AsyncSession):
 
     result = await session.scalar(select(AnswerModel).where(AnswerModel.id == answer_model.id))
 
-    assert_that(result).is_none()
+    assert_that(result).is_not_none()
+    assert_that(result.delete_datetime).is_not_none()

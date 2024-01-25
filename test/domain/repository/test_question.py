@@ -1,3 +1,4 @@
+from datetime import datetime
 from assertpy import assert_that
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
@@ -29,6 +30,7 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
             SuggestedQuestionModel(question_id=question_model2.id, user_id=user_model.id),
         ]
     )
+    await session.commit()
 
     question_respository = QuestionRepository(
         session=session,
@@ -97,6 +99,44 @@ async def test_get_question_recommendation_list_rotation(session: AsyncSession):
     assert_that(question_list[0].id).is_equal_to(question_model1.id)
     assert_that(question_list[1].id).is_equal_to(question_model2.id)
     assert_that(question_list[2].id).is_equal_to(question_model3.id)
+
+
+async def test_get_question_recommandation_list_without_deleted(session: AsyncSession):
+    user_model = UserModel()
+    question_model1 = QuestionModel(
+        delete_datetime=datetime.now()
+    )
+    question_model2 = QuestionModel()
+    question_model3 = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model1,
+            question_model2,
+            question_model3,
+        ]
+    )
+    await session.commit()
+    session.add_all(
+        instances=[
+            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
+            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
+            SuggestedQuestionModel(question_id=question_model2.id, user_id=user_model.id),
+        ]
+    )
+    await session.commit()
+
+    question_respository = QuestionRepository(
+        session=session,
+    )
+
+    question_list = await question_respository.recommendation_list(
+        user_id=user_model.id,
+        limit=3,
+    )
+    assert_that(question_list).is_length(2)
+    assert_that(question_list[0].id).is_equal_to(question_model3.id)
+    assert_that(question_list[1].id).is_equal_to(question_model2.id)
 
 
 async def test_answered_question_list(session: AsyncSession):
@@ -199,3 +239,97 @@ async def test_answered_question_list_only_given_user(session: AsyncSession):
 
     assert_that(question_list).is_length(1)
     assert_that(question_list[0].id).is_equal_to(question_model1.id)
+
+
+async def test_answered_question_list_exclude_deleted_answer(session: AsyncSession):
+    user_model = UserModel()
+    question_model1 = QuestionModel()
+    question_model2 = QuestionModel()
+    question_model3 = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model1,
+            question_model2,
+            question_model3,
+        ]
+    )
+    await session.commit()
+    answer_model1 = AnswerModel(
+        question=question_model1,
+        user=user_model,
+    )
+    answer_model2 = AnswerModel(
+        question=question_model2,
+        user=user_model,
+    )
+    answer_model3 = AnswerModel(
+        question=question_model3,
+        user=user_model,
+        delete_datetime=datetime.now(),
+    )
+    session.add_all(
+        instances=[
+            answer_model1,
+            answer_model2,
+            answer_model3,
+        ]
+    )
+    await session.commit()
+
+    question_repository = QuestionRepository(
+        session=session,
+    )
+    question_list = await question_repository.answered_list(user_id=user_model.id, limit=3, offset=0)
+
+    assert_that(question_list).is_length(2)
+    assert_that(question_list[0].id).is_equal_to(question_model1.id)
+    assert_that(question_list[1].id).is_equal_to(question_model2.id)
+
+
+async def test_answered_question_list_include_deleted_question(session: AsyncSession):
+    user_model = UserModel()
+    question_model1 = QuestionModel()
+    question_model2 = QuestionModel()
+    question_model3 = QuestionModel(
+        delete_datetime=datetime.now(),
+    )
+    session.add_all(
+        instances=[
+            user_model,
+            question_model1,
+            question_model2,
+            question_model3,
+        ]
+    )
+    await session.commit()
+    answer_model1 = AnswerModel(
+        question=question_model1,
+        user=user_model,
+    )
+    answer_model2 = AnswerModel(
+        question=question_model2,
+        user=user_model,
+    )
+    answer_model3 = AnswerModel(
+        question=question_model3,
+        user=user_model,
+    )
+    session.add_all(
+        instances=[
+            answer_model1,
+            answer_model2,
+            answer_model3,
+        ]
+    )
+    await session.commit()
+
+    question_repository = QuestionRepository(
+        session=session,
+    )
+    question_list = await question_repository.answered_list(user_id=user_model.id, limit=3, offset=0)
+
+    assert_that(question_list).is_length(3)
+    assert_that(question_list[0].id).is_equal_to(question_model1.id)
+    assert_that(question_list[1].id).is_equal_to(question_model2.id)
+    assert_that(question_list[2].id).is_equal_to(question_model3.id)

@@ -1,15 +1,20 @@
+from datetime import datetime
 from typing import List
 
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
 from domain.datasource.user import UserModel
 from domain.repository.base import BaseRepository
-from sqlalchemy import delete, select, update
+from sqlalchemy import select
 
 
 class AnswerRepository(BaseRepository):
     async def find_first_by_external_id_and_user_id(self, external_id: str, user_id: int) -> AnswerModel | None:
-        query = select(AnswerModel).where(AnswerModel.external_id == external_id, AnswerModel.user_id == user_id)
+        query = select(AnswerModel).where(
+            AnswerModel.delete_datetime == None,
+            AnswerModel.external_id == external_id, 
+            AnswerModel.user_id == user_id,
+        )
         return await self._session.scalar(query)  # type: ignore
 
     async def list(self, question_external_id: str, user_id: int, limit: int, offset: int) -> List[AnswerModel]:
@@ -18,6 +23,7 @@ class AnswerRepository(BaseRepository):
             .join(QuestionModel)
             .join(UserModel)
             .where(
+                AnswerModel.delete_datetime == None,
                 QuestionModel.external_id == question_external_id,
                 UserModel.id == user_id,
             )
@@ -38,4 +44,5 @@ class AnswerRepository(BaseRepository):
         self._session.add(answer_model)
 
     async def delete(self, answer_model: AnswerModel) -> None:
-        await self._session.delete(answer_model)
+        answer_model.delete_datetime = datetime.now()
+        self._session.add(answer_model)

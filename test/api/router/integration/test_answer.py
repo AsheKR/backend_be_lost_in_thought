@@ -244,7 +244,8 @@ async def test_delete(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     result = await session.scalar(select(AnswerModel))
-    assert_that(result).is_none()
+    assert_that(result).is_not_none()
+    assert_that(result.delete_datetime).is_not_none()
 
 
 async def test_delete_fail_when_answer_not_found(
