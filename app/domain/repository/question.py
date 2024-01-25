@@ -3,7 +3,7 @@ from datetime import datetime
 from core.language import SupportLanguage
 from domain.datasource.answer import AnswerModel
 from domain.datasource.language import LanguageModel
-from domain.datasource.question import QuestionModel, QuestionTranslationModel, SuggestedQuestionModel
+from domain.datasource.question import QuestionModel, QuestionTranslationModel
 from domain.repository.base import BaseRepository
 from pydantic import UUID4, BaseModel
 from sqlalchemy import select
@@ -96,19 +96,11 @@ class QuestionRepository(BaseRepository):
             for element in result
         ]
 
-    async def recommendation_list(self, user_id: int, language_code: SupportLanguage, limit: int) -> list[RecommendationQuestion]:
-        suggested_subquery = (
-            select(SuggestedQuestionModel.question_id, count(SuggestedQuestionModel.id).label("suggested_count"))
-            .filter(SuggestedQuestionModel.user_id == user_id)
-            .group_by(SuggestedQuestionModel.question_id)
-            .subquery()
-        )
-
+    async def recommendation_list(self, language_code: SupportLanguage, limit: int, offset: int) -> list[RecommendationQuestion]:
         query = (
             select(  # type: ignore
                 QuestionModel,
                 QuestionTranslationModel,
-                coalesce(suggested_subquery.c.suggested_count, 0).label("suggested_count"),
             )
             .join(
                 QuestionTranslationModel,
@@ -122,28 +114,15 @@ class QuestionRepository(BaseRepository):
                 QuestionModel.delete_datetime == None,
                 LanguageModel.code == language_code.value,
             )
-            .outerjoin(
-                suggested_subquery,
-                suggested_subquery.c.question_id == QuestionModel.id,
-            )
             .order_by(
-                coalesce(suggested_subquery.c.suggested_count, 0),
+                QuestionModel.answer_count.desc(),
                 QuestionModel.id,
             )
             .limit(limit)
+            .offset(offset)
         )
         execute_result = await self._session.execute(query)
         result = list(execute_result)
-
-        self._session.add_all(
-            instances=[
-                SuggestedQuestionModel(
-                    user_id=user_id,
-                    question_id=element.QuestionModel.id,
-                )
-                for element in result
-            ]
-        )
 
         return [
             RecommendationQuestion(

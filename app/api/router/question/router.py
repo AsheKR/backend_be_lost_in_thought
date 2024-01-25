@@ -50,14 +50,15 @@ async def answered_question_list(
 
 @question_router.get(path=QuestionEndPoint.recommendation)
 async def recommendation_list(
+    offset: int = 0,
     user: InternalUserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     question_service: QuestionService = Depends(get_question_service),
     accept_language: SupportLanguage = Depends(AcceptLanguageHeader()),
 ) -> list[QuestionResponse]:
     question_list = await question_service.recommendation_list(
-        user_id=user.id,
         language_code=accept_language,
+        offset=offset,
     )
     await session.commit()
     return [

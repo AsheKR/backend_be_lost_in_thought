@@ -63,11 +63,11 @@ class QuestionService(BaseService):
             for question in question_list
         ]
 
-    async def recommendation_list(self, user_id: int, language_code: SupportLanguage) -> list[QuestionSchema]:
+    async def recommendation_list(self, language_code: SupportLanguage, offset: int) -> list[QuestionSchema]:
         question_list = await self._question_repository.recommendation_list(
-            user_id=user_id,
             language_code=language_code,
             limit=3,
+            offset=offset,
         )
 
         return [

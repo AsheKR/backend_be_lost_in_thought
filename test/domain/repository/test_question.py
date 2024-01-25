@@ -6,17 +6,17 @@ from domain.datasource.answer import AnswerModel
 from domain.datasource.language import LanguageModel
 from domain.datasource.question import QuestionModel, QuestionTranslationModel
 from domain.datasource.user import UserModel
-from domain.repository.question import QuestionRepository, SuggestedQuestionModel
+from domain.repository.question import QuestionRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_get_question_recommendation_list_order_by_suggested_count_asc(
+async def test_get_question_recommendation_list_order_by_answer_count_desc(
     session: AsyncSession,
 ):
     user_model = UserModel()
     question_model1 = QuestionModel()
-    question_model2 = QuestionModel()
-    question_model3 = QuestionModel()
+    question_model2 = QuestionModel(answer_count=1)
+    question_model3 = QuestionModel(answer_count=2)
     language_model = LanguageModel(
         code=SupportLanguage.en.value,
     )
@@ -47,9 +47,6 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
                 question=question_model3,
                 text="",
             ),
-            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
-            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
-            SuggestedQuestionModel(question_id=question_model2.id, user_id=user_model.id),
         ]
     )
     await session.commit()
@@ -59,111 +56,13 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
     )
 
     question_list = await question_repository.recommendation_list(
-        user_id=user_model.id,
         language_code=SupportLanguage.en,
         limit=3,
+        offset=0,
     )
     assert_that(question_list[0].external_id).is_equal_to(question_model3.external_id)
     assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
     assert_that(question_list[2].external_id).is_equal_to(question_model1.external_id)
-
-
-async def test_get_question_recommendation_list_rotation(session: AsyncSession):
-    user_model = UserModel()
-    question_model1 = QuestionModel()
-    question_model2 = QuestionModel()
-    question_model3 = QuestionModel()
-    question_model4 = QuestionModel()
-    question_model5 = QuestionModel()
-    question_model6 = QuestionModel()
-    language_model = LanguageModel(
-        code=SupportLanguage.en.value,
-    )
-    session.add_all(
-        instances=[
-            user_model,
-            question_model1,
-            question_model2,
-            question_model3,
-            question_model4,
-            question_model5,
-            question_model6,
-            language_model,
-        ]
-    )
-    await session.commit()
-    session.add_all(
-        instances=[
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model1,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model2,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model3,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model4,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model5,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model6,
-                text="",
-            ),
-        ]
-    )
-    await session.commit()
-
-    question_repository = QuestionRepository(
-        session=session,
-    )
-
-    question_list = await question_repository.recommendation_list(
-        user_id=user_model.id,
-        language_code=SupportLanguage.en,
-        limit=3,
-    )
-    await session.commit()
-
-    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
-    assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
-    assert_that(question_list[2].external_id).is_equal_to(question_model3.external_id)
-
-    question_list = await question_repository.recommendation_list(
-        user_id=user_model.id,
-        language_code=SupportLanguage.en,
-        limit=3,
-    )
-    await session.commit()
-
-    assert_that(question_list[0].external_id).is_equal_to(question_model4.external_id)
-    assert_that(question_list[1].external_id).is_equal_to(question_model5.external_id)
-    assert_that(question_list[2].external_id).is_equal_to(question_model6.external_id)
-
-    question_list = await question_repository.recommendation_list(
-        user_id=user_model.id,
-        language_code=SupportLanguage.en,
-        limit=3,
-    )
-    await session.commit()
-
-    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
-    assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
-    assert_that(question_list[2].external_id).is_equal_to(question_model3.external_id)
 
 
 async def test_get_question_recommendation_list_without_deleted(session: AsyncSession):
@@ -201,9 +100,6 @@ async def test_get_question_recommendation_list_without_deleted(session: AsyncSe
                 question=question_model3,
                 text="",
             ),
-            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
-            SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
-            SuggestedQuestionModel(question_id=question_model2.id, user_id=user_model.id),
         ]
     )
     await session.commit()
@@ -213,13 +109,13 @@ async def test_get_question_recommendation_list_without_deleted(session: AsyncSe
     )
 
     question_list = await question_repository.recommendation_list(
-        user_id=user_model.id,
         language_code=SupportLanguage.en,
         limit=3,
+        offset=0,
     )
     assert_that(question_list).is_length(2)
-    assert_that(question_list[0].external_id).is_equal_to(question_model3.external_id)
-    assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
+    assert_that(question_list[0].external_id).is_equal_to(question_model2.external_id)
+    assert_that(question_list[1].external_id).is_equal_to(question_model3.external_id)
 
 
 async def test_answered_question_list(session: AsyncSession):
