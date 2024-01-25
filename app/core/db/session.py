@@ -21,6 +21,7 @@ class DatabaseSessionManager:
     def init(self, db_url: str) -> None:
         self._engine = create_async_engine(
             url=db_url,
+            pool_pre_ping=True,
         )
         session_maker = async_sessionmaker(
             bind=self._engine,
