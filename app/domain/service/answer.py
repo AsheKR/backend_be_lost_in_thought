@@ -11,9 +11,22 @@ class AnswerSchema(BaseModel):
     answer: str
 
 
+class InternalAnswerSchema(BaseModel):
+    id: int
+
+
 class AnswerService(BaseService):
     def __init__(self, answer_repository: AnswerRepository):
         self._answer_repository = answer_repository
+
+    async def find_first_by_external_id(self, external_id: str) -> InternalAnswerSchema | None:
+        answer_model = await self._answer_repository.find_first_by_external_id(external_id=external_id)
+        if not answer_model:
+            return None
+
+        return InternalAnswerSchema(
+            id=answer_model.id,
+        )
 
     async def list(self, question_external_id: str, user_id: int, limit: int, offset: int) -> List[AnswerSchema]:
         answer_list = await self._answer_repository.list(
@@ -35,4 +48,11 @@ class AnswerService(BaseService):
                 question_id=question_id,
                 user_id=user_id,
             ),
+        )
+
+    async def edit(self, answer_external_id: str, user_id: int, answer: str) -> None:
+        await self._answer_repository.edit(
+            answer_external_id=answer_external_id,
+            user_id=user_id,
+            answer=answer,
         )

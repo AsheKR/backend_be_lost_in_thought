@@ -1,7 +1,7 @@
 from typing import List
 
 from api.exception import UnprocessableEntity
-from api.router.answer.request import AddAnswerRequest
+from api.router.answer.request import AddAnswerRequest, EditAnswerRequest
 from api.router.answer.response import AnswerResponse
 from api.router.answer.string import AnswerEndPoint
 from api.util import get_current_user
@@ -77,6 +77,36 @@ async def add(
     await answer_service.add(
         user_id=user.id,
         question_id=internal_question_schema.id,
+        answer=request.answer,
+    )
+
+    await session.commit()
+
+
+@answer_router.post(path=AnswerEndPoint.edit)
+async def edit(
+    answer_id: UUID4,
+    request: EditAnswerRequest,
+    user: UserSchema = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    answer_repository = AnswerRepository(
+        session=session,
+    )
+    answer_service = AnswerService(
+        answer_repository=answer_repository,
+    )
+
+    internal_answer_schema = await answer_service.find_first_by_external_id(
+        external_id=str(answer_id),
+    )
+
+    if not internal_answer_schema:
+        raise UnprocessableEntity
+
+    await answer_service.edit(
+        answer_external_id=internal_answer_schema.id,
+        user_id=user.id,
         answer=request.answer,
     )
 

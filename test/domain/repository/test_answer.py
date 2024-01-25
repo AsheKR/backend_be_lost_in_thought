@@ -111,6 +111,38 @@ async def test_add(session: async_scoped_session[AsyncSession]):
     await answer_repository.add(answer=answer_model)
     await session.commit()
 
-    result = await session.scalar(select(AnswerModel).where(AnswerModel.external_id == answer_model.external_id))
+    result = await session.scalar(select(AnswerModel).where(AnswerModel.id == answer_model.id))
 
     assert_that(result).is_not_none()
+
+
+async def test_edit(session: async_scoped_session[AsyncSession]):
+    answer_repository = AnswerRepository(session=session)
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add(
+        instance=answer_model,
+    )
+    await session.commit()
+    await answer_repository.edit(
+        answer_external_id=answer_model.external_id,
+        user_id=user_model.id,
+        answer='changed'
+    )
+    await session.commit()
+
+    result = await session.scalar(select(AnswerModel).where(AnswerModel.id == answer_model.id))
+
+    assert_that(result).is_not_none()
+    assert_that(result.answer).is_equal_to('changed')
