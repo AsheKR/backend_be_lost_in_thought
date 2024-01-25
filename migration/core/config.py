@@ -24,7 +24,12 @@ class Config(BaseSettings):
 class LocalConfig(Config):
     ENV: str = Env.local
     SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
-        scheme="postgresql", username="backend", password="backend", host="localhost", path="backend", port=5678
+        scheme="postgresql",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend",
+        port=5678,
     )
 
 

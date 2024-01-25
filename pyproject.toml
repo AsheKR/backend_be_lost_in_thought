@@ -13,7 +13,8 @@ uvicorn = {extras = ["standard"], version = "^0.23.2"}
 click = "^8.1.7"
 pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.20"
-psycopg2-binary = "^2.9.7"
+asyncpg = "^0.28.0"
+greenlet = "^2.0.2"
 
 
 [tool.poetry.group.local.dependencies]
@@ -22,6 +23,7 @@ pre-commit = "^3.3.3"
 
 [tool.poetry.group.migration.dependencies]
 alembic = "^1.11.3"
+psycopg2-binary = "^2.9.7"
 
 [build-system]
 requires = ["poetry-core"]

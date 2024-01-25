@@ -29,7 +29,12 @@ class LocalConfig(Config):
     ENV: str = Env.local
     DEBUG: bool = True
     SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
-        scheme="postgresql", username="backend", password="backend", host="localhost", path="backend", port=5678
+        scheme="postgresql+asyncpg",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend",
+        port=5678,
     )
 
 

@@ -8,5 +8,6 @@ class UserModel(BaseModel):
 
 
 class UserRepository(BaseRepository):
-    def add(self, user: UserModel) -> None:
+    async def add(self, user: UserModel) -> None:
         self._session.add(user)
+        await self._session.commit()

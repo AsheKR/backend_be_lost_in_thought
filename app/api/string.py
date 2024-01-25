@@ -4,6 +4,7 @@ from enum import StrEnum
 class EndPoint(StrEnum):
     docs = "/docs"
     redoc = "/redoc"
+    user = "/users"
 
 
 class APIDocString(StrEnum):

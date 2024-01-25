@@ -1,5 +1,2 @@
-from domain.base import BaseSessionMixin
-
-
-class BaseService(BaseSessionMixin):
+class BaseService:
     pass
