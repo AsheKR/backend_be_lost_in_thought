@@ -9,11 +9,11 @@ class BaseModel(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
     external_id: Mapped[UUID] = mapped_column(unique=True, default=uuid4, nullable=False)
     create_datetime: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=func.now(),
         nullable=False,
     )
     delete_datetime: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime,
         nullable=True,
     )

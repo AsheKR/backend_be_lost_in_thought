@@ -175,9 +175,6 @@ async def test_answered_question_list(
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
     question_model3 = QuestionModel()
-    question_model4 = QuestionModel()
-    question_model5 = QuestionModel()
-    question_model6 = QuestionModel()
     language_model = LanguageModel(
         code=SupportLanguage.en.value,
     )
@@ -186,9 +183,6 @@ async def test_answered_question_list(
             question_model1,
             question_model2,
             question_model3,
-            question_model4,
-            question_model5,
-            question_model6,
             language_model,
         ]
     )
@@ -229,21 +223,6 @@ async def test_answered_question_list(
                 question=question_model3,
                 text="",
             ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model4,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model5,
-                text="",
-            ),
-            QuestionTranslationModel(
-                language=language_model,
-                question=question_model6,
-                text="",
-            ),
         ]
     )
     await session.commit()
@@ -258,7 +237,11 @@ async def test_answered_question_list(
     response_data = response.json()
 
     assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))
+    assert_that(response_data[0]["answer_count"]).is_equal_to(1)
+    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model1.create_datetime.isoformat())
     assert_that(response_data[1]["id"]).is_equal_to(str(question_model2.external_id))
+    assert_that(response_data[1]["answer_count"]).is_equal_to(1)
+    assert_that(response_data[1]["answer_datetime"]).is_equal_to(answer_model2.create_datetime.isoformat())
 
     response = await client.get(
         url="/question/answered?limit=2&offset=2",
@@ -271,6 +254,8 @@ async def test_answered_question_list(
 
     assert_that(response_data).is_length(1)
     assert_that(response_data[0]["id"]).is_equal_to(str(question_model3.external_id))
+    assert_that(response_data[0]["answer_count"]).is_equal_to(1)
+    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model3.create_datetime.isoformat())
 
     response = await client.get(
         url="/question/answered?limit=2&offset=4",

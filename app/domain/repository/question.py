@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.language import SupportLanguage
 from domain.datasource.answer import AnswerModel
 from domain.datasource.language import LanguageModel
@@ -8,7 +10,14 @@ from sqlalchemy import select
 from sqlalchemy.sql.functions import coalesce, count
 
 
-class Question(BaseModel):
+class AnsweredQuestion(BaseModel):
+    external_id: UUID4
+    question: str
+    answer_count: int
+    answer_datetime: datetime
+
+
+class RecommendationQuestion(BaseModel):
     external_id: UUID4
     question: str
 
@@ -20,9 +29,27 @@ class QuestionRepository(BaseRepository):
 
     async def answered_list(
         self, user_id: int, language_code: SupportLanguage, limit: int, offset: int
-    ) -> list[Question]:
+    ) -> list[AnsweredQuestion]:
+        answered_subquery = (
+            select(
+                AnswerModel.question_id,
+                count(AnswerModel.id).label("answer_count"),
+            )
+            .filter(
+                AnswerModel.delete_datetime == None,
+                AnswerModel.user_id == user_id,
+                LanguageModel.code == language_code.value,
+            )
+            .group_by(AnswerModel.question_id)
+            .subquery()
+        )
         query = (
-            select(AnswerModel, QuestionModel, QuestionTranslationModel)
+            select(
+                AnswerModel,
+                QuestionModel,
+                QuestionTranslationModel,
+                coalesce(answered_subquery.c.answer_count, 0).label("answer_count"),
+            )
             .join(
                 QuestionModel,
                 AnswerModel.question_id == QuestionModel.id,
@@ -34,6 +61,10 @@ class QuestionRepository(BaseRepository):
             .join(
                 LanguageModel,
                 LanguageModel.id == QuestionTranslationModel.language_id,
+            )
+            .outerjoin(
+                answered_subquery,
+                answered_subquery.c.question_id == QuestionModel.id,
             )
             .where(
                 AnswerModel.delete_datetime == None,
@@ -48,14 +79,16 @@ class QuestionRepository(BaseRepository):
         result = list(execute_result)
 
         return [
-            Question(
+            AnsweredQuestion(
                 external_id=element.QuestionModel.external_id,
                 question=element.QuestionTranslationModel.text,
+                answer_count=element.answer_count,
+                answer_datetime=element.AnswerModel.create_datetime,
             )
             for element in result
         ]
 
-    async def recommendation_list(self, user_id: int, language_code: SupportLanguage, limit: int) -> list[Question]:
+    async def recommendation_list(self, user_id: int, language_code: SupportLanguage, limit: int) -> list[RecommendationQuestion]:
         suggested_subquery = (
             select(SuggestedQuestionModel.question_id, count(SuggestedQuestionModel.id).label("suggested_count"))
             .filter(SuggestedQuestionModel.user_id == user_id)
@@ -105,7 +138,7 @@ class QuestionRepository(BaseRepository):
         )
 
         return [
-            Question(
+            RecommendationQuestion(
                 external_id=element.QuestionModel.external_id,
                 question=element.QuestionTranslationModel.text,
             )

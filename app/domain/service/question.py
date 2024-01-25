@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.language import SupportLanguage
 from domain.repository.question import QuestionRepository
 from domain.service.base import BaseService
@@ -16,6 +18,8 @@ class InternalQuestionSchema(BaseModel):
 class AnsweredQuestionSchema(BaseModel):
     id: UUID4
     question: str
+    answer_count: int
+    answer_datetime: datetime
 
 
 class QuestionService(BaseService):
@@ -45,6 +49,8 @@ class QuestionService(BaseService):
             AnsweredQuestionSchema(
                 id=question.external_id,
                 question=question.question,
+                answer_count=question.answer_count,
+                answer_datetime=question.answer_datetime,
             )
             for question in question_list
         ]

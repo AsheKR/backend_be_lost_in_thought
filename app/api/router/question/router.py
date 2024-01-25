@@ -31,6 +31,8 @@ async def answered_question_list(
         AnsweredQuestionResponse(
             id=answered_question.id,
             question=answered_question.question,
+            answer_count=answered_question.answer_count,
+            answer_datetime=answered_question.answer_datetime,
         )
         for answered_question in _answered_question_list
     ]
