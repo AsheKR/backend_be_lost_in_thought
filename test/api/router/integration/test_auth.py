@@ -4,12 +4,20 @@ from uuid import uuid4
 
 from assertpy import assert_that
 from core.config import Config
-from core.util.jwt import JWTUtil
 from domain.datasource.user import UserModel
-from domain.service.jwt import JWTSchema, JWTService
+from domain.service.jwt import JWTService
 from freezegun import freeze_time
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
+
+
+async def test_register(client: AsyncClient):
+    response = await client.post(
+        url="/auth/register",
+    )
+
+    assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
+    response_data = response.json()
+    assert_that(response_data["id"]).is_not_none()
 
 
 async def test_login(client: AsyncClient, user_model: UserModel):

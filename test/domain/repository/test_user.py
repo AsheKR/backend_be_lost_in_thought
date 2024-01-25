@@ -37,12 +37,13 @@ async def test_find_first_by_external_id_return_none_when_not_exist(session: Asy
     assert_that(user_result).is_none()
 
 
-async def test_add(session: AsyncSession):
+async def test_register(session: AsyncSession):
     user_repository = UserRepository(session=session)
-    user_model = UserModel()
-    await user_repository.add(user=user_model)
+
+    user_model = await user_repository.register()
     await session.commit()
 
-    result = await session.scalar(select(UserModel).where(UserModel.external_id == user_model.external_id))
+    result = await session.scalar(select(UserModel))
 
-    assert_that(result).is_not_none()
+    assert_that(user_model).is_not_none()
+    assert_that(user_model.external_id).is_equal_to(result.external_id)

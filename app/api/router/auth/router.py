@@ -1,9 +1,12 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.depdendency import get_jwt_service, get_user_service
 from api.router.auth.exception import AuthFailException, JWTDecodeAPIException, JWTExpiredAPIException
 from api.router.auth.request import LoginRequest, RefreshRequest
-from api.router.auth.response import LoginResponse
+from api.router.auth.response import LoginResponse, RegisterResponse
 from api.router.auth.string import AuthEndPoint
 from api.util.auth import AuthorizationCredential
+from core.db.session import get_session
 from core.util.jwt import JWTDecodeException, JWTExpiredException
 from domain.service.jwt import JWTSchema, JWTService
 from domain.service.user import UserService
@@ -12,6 +15,18 @@ from fastapi.security import HTTPAuthorizationCredentials
 from result import Err
 
 auth_router = APIRouter()
+
+
+@auth_router.post(path=AuthEndPoint.register)
+async def register(
+        session: AsyncSession = Depends(get_session),
+        user_service: UserService = Depends(get_user_service),
+) -> RegisterResponse:
+    user_id = await user_service.register()
+    await session.commit()
+    return RegisterResponse(
+        id=user_id,
+    )
 
 
 @auth_router.post(path=AuthEndPoint.login)

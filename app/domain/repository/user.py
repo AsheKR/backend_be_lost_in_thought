@@ -9,5 +9,8 @@ class UserRepository(BaseRepository):
         query = select(UserModel).where(UserModel.delete_datetime == None, UserModel.external_id == external_id)
         return await self._session.scalar(query)  # type: ignore
 
-    async def add(self, user: UserModel) -> None:
-        self._session.add(user)
+    async def register(self) -> UserModel:
+        user_model = UserModel()
+        self._session.add(user_model)
+        await self._session.flush()
+        return user_model

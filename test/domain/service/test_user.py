@@ -37,10 +37,18 @@ async def test_find_first_by_external_id_return_none_when_not_exist():
         assert_that(user_result).is_none()
 
 
-async def test_add():
-    with patch("domain.repository.user.UserRepository.add") as add:
+async def test_register():
+    user_model = UserModel(
+        id=1,
+        external_id=uuid4(),
+    )
+    with patch(
+            "domain.repository.user.UserRepository.register", return_value=user_model,
+    ) as register:
         user_repository = UserRepository(session=Any)
         user_service = UserService(user_repository=user_repository)
 
-        await user_service.add()
-        add.assert_awaited_once()
+        external_id = await user_service.register()
+
+        register.assert_awaited_once()
+        assert_that(external_id).is_not_none()

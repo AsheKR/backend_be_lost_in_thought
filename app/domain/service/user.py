@@ -23,5 +23,6 @@ class UserService(BaseService):
             external_id=user_model.external_id,
         )
 
-    async def add(self) -> None:
-        await self._user_repository.add(user=UserModel())
+    async def register(self) -> str:
+        user_model = await self._user_repository.register()
+        return user_model.external_id

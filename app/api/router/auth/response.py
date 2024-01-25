@@ -1,4 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
+
+
+class RegisterResponse(BaseModel):
+    id: UUID4
 
 
 class LoginResponse(BaseModel):
