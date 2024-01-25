@@ -1,10 +1,9 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from core.config import Config
 from core.util.jwt import JWTUtil
 from domain.datasource.user import UserModel
-from domain.service.jwt import JWTService, JWTSchema
+from domain.service.jwt import JWTSchema, JWTService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture(scope="session")

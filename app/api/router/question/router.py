@@ -1,5 +1,5 @@
 from api.router.depdendency import get_question_service
-from api.router.question.response import QuestionResponse, AnsweredQuestionResponse
+from api.router.question.response import AnsweredQuestionResponse, QuestionResponse
 from api.router.question.string import QuestionEndPoint
 from api.util import get_current_user
 from core.db.session import get_session
@@ -18,7 +18,7 @@ async def answered_question_list(
     offset: int = 0,
     user: UserSchema = Depends(get_current_user),
     question_service: QuestionService = Depends(get_question_service),
-):
+) -> list[AnsweredQuestionResponse]:
     _answered_question_list = await question_service.answered_list(
         user_id=user.id,
         limit=limit,

@@ -1,5 +1,4 @@
 from assertpy import assert_that
-
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
 from domain.datasource.user import UserModel
@@ -192,7 +191,11 @@ async def test_answered_question_list_only_given_user(session: AsyncSession):
     question_repository = QuestionRepository(
         session=session,
     )
-    question_list = await question_repository.answered_list(user_id=user_model1.id, limit=2, offset=0,)
+    question_list = await question_repository.answered_list(
+        user_id=user_model1.id,
+        limit=2,
+        offset=0,
+    )
 
     assert_that(question_list).is_length(1)
     assert_that(question_list[0].id).is_equal_to(question_model1.id)

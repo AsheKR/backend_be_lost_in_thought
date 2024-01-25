@@ -6,12 +6,14 @@ from core.util.jwt import JWTUtil
 from domain.datasource.answer import AnswerModel
 from domain.repository.question import QuestionModel, SuggestedQuestionModel
 from domain.repository.user import UserModel
-from domain.service.jwt import JWTService, JWTSchema
+from domain.service.jwt import JWTSchema, JWTService
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_recommendation_list_order_by_suggested_count_asc(client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema):
+async def test_recommendation_list_order_by_suggested_count_asc(
+    client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema
+):
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
     question_model3 = QuestionModel()
@@ -46,7 +48,9 @@ async def test_recommendation_list_order_by_suggested_count_asc(client: AsyncCli
     assert_that(response_data[2]["id"]).is_equal_to(str(question_model1.external_id))
 
 
-async def test_recommendation_list_rotation(client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema):
+async def test_recommendation_list_rotation(
+    client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema
+):
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
     question_model3 = QuestionModel()
@@ -105,7 +109,9 @@ async def test_recommendation_list_rotation(client: AsyncClient, session: AsyncS
     assert_that(response_data[2]["id"]).is_equal_to(str(question_model3.external_id))
 
 
-async def test_answered_question_list(client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema):
+async def test_answered_question_list(
+    client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema
+):
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
     question_model3 = QuestionModel()
@@ -153,8 +159,8 @@ async def test_answered_question_list(client: AsyncClient, session: AsyncSession
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
 
-    assert_that(response_data[0]['id']).is_equal_to(str(question_model1.external_id))
-    assert_that(response_data[1]['id']).is_equal_to(str(question_model2.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(question_model2.external_id))
 
     response = await client.get(
         url="/question/answered?limit=2&offset=2",
@@ -166,7 +172,7 @@ async def test_answered_question_list(client: AsyncClient, session: AsyncSession
     response_data = response.json()
 
     assert_that(response_data).is_length(1)
-    assert_that(response_data[0]['id']).is_equal_to(str(question_model3.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(question_model3.external_id))
 
     response = await client.get(
         url="/question/answered?limit=2&offset=4",
@@ -180,7 +186,9 @@ async def test_answered_question_list(client: AsyncClient, session: AsyncSession
     assert_that(response_data).is_empty()
 
 
-async def test_answered_question_list_only_given_user(client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema):
+async def test_answered_question_list_only_given_user(
+    client: AsyncClient, session: AsyncSession, user_model: UserModel, jwt_schema: JWTSchema
+):
     question_model1 = QuestionModel()
     user_model2 = UserModel()
     question_model2 = QuestionModel()
@@ -218,4 +226,4 @@ async def test_answered_question_list_only_given_user(client: AsyncClient, sessi
     response_data = response.json()
 
     assert_that(response_data).is_length(1)
-    assert_that(response_data[0]['id']).is_equal_to(str(question_model1.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))

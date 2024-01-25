@@ -6,7 +6,7 @@ from core.util.jwt import JWTUtil
 from domain.repository.answer import AnswerModel
 from domain.repository.question import QuestionModel
 from domain.repository.user import UserModel
-from domain.service.jwt import JWTService, JWTSchema
+from domain.service.jwt import JWTSchema, JWTService
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -152,8 +152,8 @@ async def test_add_fail_when_question_not_found(
 async def test_edit(
     client: AsyncClient,
     session: AsyncSession,
-        user_model: UserModel,
-        jwt_schema: JWTSchema,
+    user_model: UserModel,
+    jwt_schema: JWTSchema,
 ):
     question_model = QuestionModel()
     session.add_all(
@@ -190,7 +190,7 @@ async def test_edit(
 async def test_edit_fail_when_answer_not_found(
     client: AsyncClient,
     session: AsyncSession,
-        jwt_schema: JWTSchema,
+    jwt_schema: JWTSchema,
 ):
     question_model = QuestionModel()
     session.add_all(
@@ -216,8 +216,8 @@ async def test_edit_fail_when_answer_not_found(
 async def test_delete(
     client: AsyncClient,
     session: AsyncSession,
-        user_model: UserModel,
-        jwt_schema: JWTSchema,
+    user_model: UserModel,
+    jwt_schema: JWTSchema,
 ):
     question_model = QuestionModel()
     session.add_all(
@@ -250,8 +250,8 @@ async def test_delete(
 async def test_delete_fail_when_answer_not_found(
     client: AsyncClient,
     session: AsyncSession,
-        user_model: UserModel,
-        jwt_schema: JWTSchema,
+    user_model: UserModel,
+    jwt_schema: JWTSchema,
 ):
     question_model = QuestionModel()
     session.add_all(

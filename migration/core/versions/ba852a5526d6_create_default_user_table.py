@@ -10,6 +10,7 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy import func
 
 # revision identifiers, used by Alembic.
 revision: str = "ba852a5526d6"
@@ -23,6 +24,8 @@ def upgrade() -> None:
         "user",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("external_id", sa.UUID, unique=True, default=uuid4),
+        sa.Column("create_datetime", sa.DateTime, server_default=func.now()),
+        sa.Column("delete_datetime", sa.DateTime, server_default=func.now()),
     )
 
 

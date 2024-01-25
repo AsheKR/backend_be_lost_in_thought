@@ -6,7 +6,7 @@ from assertpy import assert_that
 from core.config import Config
 from core.util.jwt import JWTUtil
 from domain.datasource.user import UserModel
-from domain.service.jwt import JWTService, JWTSchema
+from domain.service.jwt import JWTSchema, JWTService
 from freezegun import freeze_time
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -76,7 +76,10 @@ async def test_refresh_fail_when_token_decode_exception(client: AsyncClient):
 
 
 async def test_refresh_fail_when_access_token_expired_exception(
-config: Config, client: AsyncClient, user_model: UserModel, jwt_service: JWTService,
+    config: Config,
+    client: AsyncClient,
+    user_model: UserModel,
+    jwt_service: JWTService,
 ):
     with freeze_time(datetime.utcnow() - config.JWT_REFRESH_TOKEN_EXPIRE_DELTA - timedelta(hours=1)):
         jwt_schema = jwt_service.create(external_id=str(user_model.external_id))
