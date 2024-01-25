@@ -9,14 +9,15 @@ from core.config import Env, EnvironmentKey, get_config
 @click.option(
     "--env",
     type=click.Choice([Env.local, Env.development, Env.production], case_sensitive=False),
-    default="local",
 )
 @click.option(
     "--debug",
     type=click.BOOL,
 )
-def main(env: str, debug: bool | None) -> None:
-    os.environ[EnvironmentKey.env] = env
+def main(env: str | None, debug: bool | None) -> None:
+    if env is not None:
+        os.environ[EnvironmentKey.env] = env
+
     if debug is not None:
         os.environ[EnvironmentKey.debug] = str(debug)
 
