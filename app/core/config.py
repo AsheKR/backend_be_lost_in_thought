@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from enum import StrEnum
 from functools import lru_cache
 
@@ -23,6 +24,10 @@ class Config(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     SQLALCHEMY_DATABASE_URI: PostgresDsn
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta
+    JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta
 
 
 class LocalConfig(Config):
@@ -36,6 +41,10 @@ class LocalConfig(Config):
         path="backend",
         port=5678,
     )
+    JWT_SECRET_KEY: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta = timedelta(hours=7)
+    JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta = timedelta(days=7)
 
 
 class DevelopmentConfig(Config):

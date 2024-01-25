@@ -15,6 +15,9 @@ pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.20"
 asyncpg = "^0.28.0"
 greenlet = "^2.0.2"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+orjson = "^3.9.5"
+result = "^0.13.1"
 
 
 [tool.poetry.group.local.dependencies]
