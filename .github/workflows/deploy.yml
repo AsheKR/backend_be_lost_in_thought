@@ -46,5 +46,5 @@ jobs:
       - uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: ${{ secrets.GC_SERVICE_NAME }}-${{ github.event.inputs.environment }}
-          region: ${{ secrets.GC_AR_LOCATION }}
+          region: ${{ secrets.GC_SERVICE_LOCATION }}
           image: ${{ secrets.GC_AR_LOCATION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/${{ secrets.GC_REGISTRY_NAME }}/${{ github.event.inputs.environment }}:${{ github.sha }}
