@@ -1,11 +1,11 @@
 from typing import List
 
+from api.depdendency import get_answer_service, get_question_service
 from api.exception import UnprocessableEntity
 from api.router.answer.request import AddAnswerRequest, EditAnswerRequest
 from api.router.answer.response import AnswerResponse
 from api.router.answer.string import AnswerDetailEndPoint, AnswerEndPoint
-from api.router.depdendency import get_answer_service, get_question_service
-from api.util import get_current_user
+from api.util.auth import get_current_user
 from core.db.session import get_session
 from domain.service.answer import AnswerService
 from domain.service.exception import DoesNotExist

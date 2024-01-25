@@ -12,7 +12,7 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials
 from fastapi.security.utils import get_authorization_scheme_param
 from result import Err
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_403_FORBIDDEN
 
 AuthorizationHeader = APIKeyHeader(name="Authorization", scheme_name="JWT")

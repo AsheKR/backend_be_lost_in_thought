@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from assertpy import assert_that
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
@@ -22,26 +23,32 @@ async def test_answer_pagination(session: AsyncSession):
     answer_model1 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model2 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model3 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model4 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model5 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model6 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add_all(
         instances=[
@@ -108,15 +115,18 @@ async def test_answer_list_exclude_deleted(session: AsyncSession):
     answer_model1 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model2 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model3 = AnswerModel(
         question=question_model,
         user=user_model,
         delete_datetime=datetime.now(),
+        answer="",
     )
     session.add_all(
         instances=[
@@ -152,6 +162,7 @@ async def test_add(session: AsyncSession):
     answer_model = AnswerModel(
         question_id=question_model.id,
         user_id=user_model.id,
+        answer="",
     )
     await answer_repository.add(answer_model=answer_model)
     await session.commit()
@@ -175,6 +186,7 @@ async def test_edit(session: AsyncSession):
     answer_model = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add(
         instance=answer_model,
@@ -203,6 +215,7 @@ async def test_delete(session: AsyncSession):
     answer_model = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add(
         instance=answer_model,
@@ -233,10 +246,12 @@ async def test_delete_all(session: AsyncSession):
     answer_model1 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model2 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add_all(
         instances=[

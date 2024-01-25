@@ -25,26 +25,32 @@ async def test_answer_pagination(
     answer_model1 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model2 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model3 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model4 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model5 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     answer_model6 = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add_all(
         instances=[
@@ -163,6 +169,7 @@ async def test_edit(
     answer_model = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add(
         instance=answer_model,
@@ -227,6 +234,7 @@ async def test_delete(
     answer_model = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add(
         instance=answer_model,
@@ -262,6 +270,7 @@ async def test_delete_fail_when_answer_not_found(
     answer_model = AnswerModel(
         question=question_model,
         user=user_model,
+        answer="",
     )
     session.add(
         instance=answer_model,

@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 class AnswerModel(BaseModel):
     __tablename__ = TableName.answer
 
-    answer: Mapped[str] = mapped_column(nullable=False, default="")
+    answer: Mapped[str] = mapped_column(nullable=False)
 
-    question_id: Mapped[int] = mapped_column(ForeignKey("question.id"))
+    question_id: Mapped[int] = mapped_column(ForeignKey("question.id"), nullable=False)
     question: Mapped["QuestionModel"] = relationship(back_populates="answer_list")
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     user: Mapped["UserModel"] = relationship(back_populates="answer_list")

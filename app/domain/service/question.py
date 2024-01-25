@@ -1,3 +1,4 @@
+from core.language import SupportLanguage
 from domain.repository.question import QuestionRepository
 from domain.service.base import BaseService
 from pydantic import UUID4, BaseModel
@@ -30,9 +31,12 @@ class QuestionService(BaseService):
             id=question_model.id,
         )
 
-    async def answered_list(self, user_id: int, limit: int, offset: int) -> list[AnsweredQuestionSchema]:
+    async def answered_list(
+        self, user_id: int, language_code: SupportLanguage, limit: int, offset: int
+    ) -> list[AnsweredQuestionSchema]:
         question_list = await self._question_repository.answered_list(
             user_id=user_id,
+            language_code=language_code,
             limit=limit,
             offset=offset,
         )
@@ -45,15 +49,16 @@ class QuestionService(BaseService):
             for question in question_list
         ]
 
-    async def recommendation_list(self, user_id: int) -> list[QuestionSchema]:
+    async def recommendation_list(self, user_id: int, language_code: SupportLanguage) -> list[QuestionSchema]:
         question_list = await self._question_repository.recommendation_list(
             user_id=user_id,
+            language_code=language_code,
             limit=3,
         )
 
         return [
             QuestionSchema(
-                external_id=question.external_id,
+                external_id=str(question.external_id),
                 question=question.question,
             )
             for question in question_list

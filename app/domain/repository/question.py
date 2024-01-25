@@ -1,8 +1,16 @@
+from core.language import SupportLanguage
 from domain.datasource.answer import AnswerModel
-from domain.datasource.question import QuestionModel, SuggestedQuestionModel
+from domain.datasource.language import LanguageModel
+from domain.datasource.question import QuestionModel, QuestionTranslationModel, SuggestedQuestionModel
 from domain.repository.base import BaseRepository
+from pydantic import UUID4, BaseModel
 from sqlalchemy import select
 from sqlalchemy.sql.functions import coalesce, count
+
+
+class Question(BaseModel):
+    external_id: UUID4
+    question: str
 
 
 class QuestionRepository(BaseRepository):
@@ -10,21 +18,44 @@ class QuestionRepository(BaseRepository):
         query = select(QuestionModel).where(QuestionModel.external_id == external_id)
         return await self._session.scalar(query)  # type: ignore
 
-    async def answered_list(self, user_id: int, limit: int, offset: int) -> list[QuestionModel]:
+    async def answered_list(
+        self, user_id: int, language_code: SupportLanguage, limit: int, offset: int
+    ) -> list[Question]:
         query = (
-            select(AnswerModel)
-            .join(QuestionModel)
-            .where(AnswerModel.delete_datetime == None, AnswerModel.user_id == user_id,)
+            select(AnswerModel, QuestionModel, QuestionTranslationModel)
+            .join(
+                QuestionModel,
+                AnswerModel.question_id == QuestionModel.id,
+            )
+            .join(
+                QuestionTranslationModel,
+                QuestionTranslationModel.question_id == QuestionModel.id,
+            )
+            .join(
+                LanguageModel,
+                LanguageModel.id == QuestionTranslationModel.language_id,
+            )
+            .where(
+                AnswerModel.delete_datetime == None,
+                AnswerModel.user_id == user_id,
+                LanguageModel.code == language_code.value,
+            )
             .order_by(AnswerModel.id)
             .limit(limit=limit)
             .offset(offset=offset)
         )
-        scalar_result = await self._session.scalars(query)
-        result = scalar_result.all()
+        execute_result = await self._session.execute(query)
+        result = list(execute_result)
 
-        return [element.question for element in result]
+        return [
+            Question(
+                external_id=element.QuestionModel.external_id,
+                question=element.QuestionTranslationModel.text,
+            )
+            for element in result
+        ]
 
-    async def recommendation_list(self, user_id: int, limit: int) -> list[QuestionModel]:
+    async def recommendation_list(self, user_id: int, language_code: SupportLanguage, limit: int) -> list[Question]:
         suggested_subquery = (
             select(SuggestedQuestionModel.question_id, count(SuggestedQuestionModel.id).label("suggested_count"))
             .filter(SuggestedQuestionModel.user_id == user_id)
@@ -35,10 +66,20 @@ class QuestionRepository(BaseRepository):
         query = (
             select(  # type: ignore
                 QuestionModel,
+                QuestionTranslationModel,
                 coalesce(suggested_subquery.c.suggested_count, 0).label("suggested_count"),
+            )
+            .join(
+                QuestionTranslationModel,
+                QuestionTranslationModel.question_id == QuestionModel.id,
+            )
+            .join(
+                LanguageModel,
+                LanguageModel.id == QuestionTranslationModel.language_id,
             )
             .where(
                 QuestionModel.delete_datetime == None,
+                LanguageModel.code == language_code.value,
             )
             .outerjoin(
                 suggested_subquery,
@@ -50,17 +91,23 @@ class QuestionRepository(BaseRepository):
             )
             .limit(limit)
         )
-        scalar_result = await self._session.scalars(query)
-        result = scalar_result.all()
+        execute_result = await self._session.execute(query)
+        result = list(execute_result)
 
         self._session.add_all(
             instances=[
                 SuggestedQuestionModel(
                     user_id=user_id,
-                    question_id=question.id,
+                    question_id=element.QuestionModel.id,
                 )
-                for question in result
+                for element in result
             ]
         )
 
-        return result  # type: ignore
+        return [
+            Question(
+                external_id=element.QuestionModel.external_id,
+                question=element.QuestionTranslationModel.text,
+            )
+            for element in result
+        ]

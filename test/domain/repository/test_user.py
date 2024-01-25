@@ -20,15 +20,13 @@ async def test_find_first_by_external_id(session: AsyncSession):
 
 async def test_find_first_by_external_id_exclude_deleted_data(session: AsyncSession):
     user_repository = UserRepository(session=session)
-    user_model = UserModel(
-        delete_datetime=datetime.now()
-    )
+    user_model = UserModel(delete_datetime=datetime.now())
     session.add(instance=user_model)
     await session.commit()
 
     user_result = await user_repository.find_first_by_external_id(
         external_id=user_model.external_id,
-        )
+    )
     assert_that(user_result).is_none()
 
 

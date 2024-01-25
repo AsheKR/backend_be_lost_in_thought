@@ -1,3 +1,5 @@
+from typing import Type
+
 import os
 from datetime import timedelta
 from enum import StrEnum

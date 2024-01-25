@@ -24,10 +24,10 @@ def upgrade() -> None:
     op.create_table(
         "answer",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("external_id", sa.UUID, unique=True, default=uuid4),
-        sa.Column("create_datetime", sa.DateTime, default=func.now()),
-        sa.Column("delete_datetime", sa.DateTime, server_default=func.now()),
-        sa.Column("answer", sa.VARCHAR(length=3000), default=""),
+        sa.Column("external_id", sa.UUID, unique=True, default=uuid4, nullable=False),
+        sa.Column("create_datetime", sa.DateTime, server_default=func.now(), nullable=False),
+        sa.Column("delete_datetime", sa.DateTime, nullable=True),
+        sa.Column("answer", sa.VARCHAR(length=3000), nullable=False),
         sa.Column("question_id", sa.Integer, sa.ForeignKey("question.id"), nullable=False),
         sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False),
     )

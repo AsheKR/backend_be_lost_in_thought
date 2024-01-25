@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from core.db.model import BaseModel
 from domain.string import TableName
@@ -12,5 +12,5 @@ if TYPE_CHECKING:
 class UserModel(BaseModel):
     __tablename__ = TableName.user
 
-    suggested_question_list: Mapped["SuggestedQuestionModel"] = relationship(back_populates="user")
-    answer_list: Mapped["AnswerModel"] = relationship(back_populates="user")
+    suggested_question_list: Mapped[List["SuggestedQuestionModel"]] = relationship(back_populates="user")
+    answer_list: Mapped[List["AnswerModel"]] = relationship(back_populates="user")

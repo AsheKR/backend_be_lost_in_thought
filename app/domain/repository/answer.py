@@ -1,5 +1,6 @@
-from datetime import datetime
 from typing import List
+
+from datetime import datetime
 
 from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
@@ -12,7 +13,7 @@ class AnswerRepository(BaseRepository):
     async def find_first_by_external_id_and_user_id(self, external_id: str, user_id: int) -> AnswerModel | None:
         query = select(AnswerModel).where(
             AnswerModel.delete_datetime == None,
-            AnswerModel.external_id == external_id, 
+            AnswerModel.external_id == external_id,
             AnswerModel.user_id == user_id,
         )
         return await self._session.scalar(query)  # type: ignore
@@ -48,7 +49,13 @@ class AnswerRepository(BaseRepository):
         self._session.add(answer_model)
 
     async def delete_all(self, user_id: int) -> None:
-        query = update(AnswerModel).where(AnswerModel.delete_datetime == None, AnswerModel.user_id == user_id).values({
-            AnswerModel.delete_datetime: datetime.now(),
-        })
+        query = (
+            update(AnswerModel)
+            .where(AnswerModel.delete_datetime == None, AnswerModel.user_id == user_id)
+            .values(
+                {
+                    AnswerModel.delete_datetime: datetime.now(),
+                }
+            )
+        )
         await self._session.execute(query)
