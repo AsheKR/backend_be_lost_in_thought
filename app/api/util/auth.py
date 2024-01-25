@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from api.exception import UnauthorizedException
+from api.exception import UnauthorizedException, ForbiddenException
 from api.router.auth.exception import JWTDecodeAPIException, JWTExpiredAPIException
 from core.config import get_config
 from core.db.session import get_session
@@ -26,15 +26,12 @@ class AuthorizationCredential:
         scheme, credentials = get_authorization_scheme_param(authorization)
         if not (authorization and scheme and credentials):
             if self._auto_error:
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authenticated")
+                raise ForbiddenException
             else:
                 return None
         if scheme.lower() != "jwt":
             if self._auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN,
-                    detail="Invalid authentication credentials",
-                )
+                raise ForbiddenException
             else:
                 return None
         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)

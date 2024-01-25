@@ -73,8 +73,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model1.external_id))
-    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model2.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model6.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model5.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=2",
@@ -85,8 +85,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model3.external_id))
-    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model4.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model4.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model3.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=4",
@@ -97,8 +97,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model5.external_id))
-    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model6.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model2.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model1.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=6",

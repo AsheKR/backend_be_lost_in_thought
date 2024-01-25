@@ -1,7 +1,7 @@
-from api.exception import BadRequestException, ErrorCode
+from api.exception import ForbiddenException, ErrorCode
 
 
-class AuthFailException(BadRequestException):
+class AuthFailException(ForbiddenException):
     error_code = ErrorCode.auth_fail.value
 
 

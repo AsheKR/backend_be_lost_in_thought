@@ -42,7 +42,7 @@ async def test_login_fail_when_external_id_does_not_exist(client: AsyncClient):
         },
     )
 
-    assert_that(response.status_code).is_equal_to(HTTPStatus.BAD_REQUEST)
+    assert_that(response.status_code).is_equal_to(HTTPStatus.FORBIDDEN)
     response_data = response.json()
     assert_that(response_data["error_code"]).is_equal_to("AUTH__FAIL")
 
@@ -78,7 +78,7 @@ async def test_refresh_fail_when_token_decode_exception(client: AsyncClient):
         },
     )
 
-    assert_that(response.status_code).is_equal_to(HTTPStatus.BAD_REQUEST)
+    assert_that(response.status_code).is_equal_to(HTTPStatus.FORBIDDEN)
     response_data = response.json()
     assert_that(response_data["error_code"]).is_equal_to("AUTH__DECODE_TOKEN")
 
@@ -102,6 +102,6 @@ async def test_refresh_fail_when_access_token_expired_exception(
         },
     )
 
-    assert_that(response.status_code).is_equal_to(HTTPStatus.BAD_REQUEST)
+    assert_that(response.status_code).is_equal_to(HTTPStatus.FORBIDDEN)
     response_data = response.json()
     assert_that(response_data["error_code"]).is_equal_to("AUTH__EXPIRED_TOKEN")
