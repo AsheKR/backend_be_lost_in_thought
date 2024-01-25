@@ -8,6 +8,7 @@ from api.router.auth.router import auth_router
 from api.router.delete.router import delete_all_router
 from api.router.question.router import question_router
 from api.router.question.string import QuestionEndPoint
+from api.router.version.router import version_router
 from api.string import APIDocString, RootEndPoint
 from core.config import Env, get_config
 from core.db.session import db_manager
@@ -34,6 +35,7 @@ def _init_router(fast_api_: FastAPI) -> None:
     fast_api_.include_router(question_router, prefix=RootEndPoint.question)
     fast_api_.include_router(answer_detail_router, prefix=RootEndPoint.answer)
     fast_api_.include_router(delete_all_router, prefix=RootEndPoint.delete_all)
+    fast_api_.include_router(version_router, prefix=RootEndPoint.version)
 
 
 def _init_listener(fast_api_: FastAPI) -> None:

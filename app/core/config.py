@@ -1,5 +1,3 @@
-from typing import Type
-
 import os
 from datetime import timedelta
 from enum import StrEnum
@@ -31,6 +29,8 @@ class Config(BaseSettings):
     JWT_ALGORITHM: str
     JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta
     JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta
+    ANDROID_LATEST_VERSION: str = "0.0.1"
+    IOS_LATEST_VERSION: str = "0.0.1"
 
 
 class LocalConfig(Config):
