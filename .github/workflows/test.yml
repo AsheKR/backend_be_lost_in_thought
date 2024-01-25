@@ -1,0 +1,52 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: backend
+          POSTGRES_PASSWORD: backend
+          POSTGRES_DB: backend_test
+        ports:
+          - 5678:5432
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.5'
+
+      - uses: snok/install-poetry@v1
+        with:
+          version: 1.5.0
+          virtualenvs-in-project: true
+
+      - uses: actions/cache@v3
+        id: cached-poetry-dependencies
+        with:
+          path: .venv
+          key: venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-ansi --no-interaction --no-root --with test
+
+      - name: Migration
+        working-directory: migration
+        env:
+          ENV: test
+        run: |
+          source ../.venv/bin/activate
+          alembic upgrade head
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          coverage run -m pytest
+          coverage report
