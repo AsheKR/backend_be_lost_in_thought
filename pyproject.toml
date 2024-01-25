@@ -10,6 +10,8 @@ packages = [{include = "diary_backend"}]
 python = "^3.11"
 fastapi = "^0.101.1"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
+click = "^8.1.7"
+pydantic-settings = "^2.0.3"
 
 
 [tool.poetry.group.local.dependencies]
@@ -26,8 +28,7 @@ target-versions = ["py37", "py38", "py39", "py310", "py311"]
 line-length = 120
 color = true
 
-exclude = [".git"]
-
+exclude = '.git'
 [tool.isort]
 # https://github.com/timothycrosley/isort/
 py_version = 311
