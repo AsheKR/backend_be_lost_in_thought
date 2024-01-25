@@ -12,6 +12,7 @@ class EnvironmentKey(StrEnum):
 
 class Env(StrEnum):
     local = "local"
+    test = "test"
     development = "development"
     production = "production"
 
@@ -33,6 +34,17 @@ class LocalConfig(Config):
     )
 
 
+class TestConfig(LocalConfig):
+    SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
+        scheme="postgresql",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend_test",
+        port=5678,
+    )
+
+
 class DevelopmentConfig(Config):
     ENV: str = Env.development
 
@@ -45,6 +57,7 @@ class ProductionConfig(Config):
 def get_config() -> Config:
     config = {
         Env.local: LocalConfig,
+        Env.test: TestConfig,
         Env.development: DevelopmentConfig,
         Env.production: ProductionConfig,
     }[Env[os.getenv(EnvironmentKey.env, default=Env.local)]]()

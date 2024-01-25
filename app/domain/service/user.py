@@ -1,6 +1,7 @@
 from domain.repository.user import UserModel, UserRepository
 from domain.service.base import BaseService
 from pydantic import UUID4, BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 
 class UserSchema(BaseModel):
@@ -8,9 +9,9 @@ class UserSchema(BaseModel):
 
 
 class UserService(BaseService):
-    def __init__(self):
+    def __init__(self, user_repository: UserRepository):
         super().__init__()
-        self._user_repository = UserRepository()
+        self._user_repository = user_repository
 
     async def find_first_by_external_id(self, external_id: str) -> UserSchema | None:
         user_model = await self._user_repository.find_first_by_external_id(external_id=external_id)

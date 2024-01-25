@@ -5,9 +5,9 @@ class AuthFailException(BadRequestException):
     error_code = ErrorCode.auth_fail.value
 
 
-class JWTDecodeTokenAPIException(AuthFailException):
+class JWTDecodeAPIException(AuthFailException):
     error_code = ErrorCode.jwt_decode_token.value
 
 
-class JWTExpiredTokenAPIException(AuthFailException):
+class JWTExpiredAPIException(AuthFailException):
     error_code = ErrorCode.jwt_expired_token.value

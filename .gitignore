@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/jetbrains+all,linux,macos,windows,python,virtualenv
-# Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains+all,linux,macos,windows,python,virtualenv
+# Created by https://www.toptal.com/developers/gitignore/api/jetbrains+all,linux,macos,windows,python,virtualenv,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains+all,linux,macos,windows,python,virtualenv,visualstudiocode
 
 ### JetBrains+all ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -321,6 +321,25 @@ pyrightconfig.json
 pyvenv.cfg
 pip-selfcheck.json
 
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -347,4 +366,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/jetbrains+all,linux,macos,windows,python,virtualenv
+# End of https://www.toptal.com/developers/gitignore/api/jetbrains+all,linux,macos,windows,python,virtualenv,visualstudiocode

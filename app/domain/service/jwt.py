@@ -18,6 +18,9 @@ class JWTSchema(BaseModel):
 
 
 class JWTService(BaseService):
+    def __init__(self, jwt_util: JWTUtil):
+        self._jwt_util = jwt_util
+
     def create(self, external_id: str) -> JWTSchema:
         return JWTSchema(
             access_token=self._create_access_token(external_id=external_id),
@@ -28,7 +31,7 @@ class JWTService(BaseService):
         self, access_token: str, refresh_token: str
     ) -> Result[JWTSchema, JWTDecodeException | JWTExpiredException]:
         try:
-            JWTUtil.decode(token=access_token)
+            self._jwt_util.decode(token=access_token)
         except JWTDecodeException as e:
             return Err(e)
         except JWTExpiredException:
@@ -37,11 +40,11 @@ class JWTService(BaseService):
             return Err(JWTDecodeException())
 
         try:
-            JWTUtil.decode(token=refresh_token)
+            self._jwt_util.decode(token=refresh_token)
         except (JWTDecodeException, JWTExpiredException) as e:
             return Err(e)
 
-        raw_access_token = JWTUtil.decode(token=access_token, verify_exp=False)
+        raw_access_token = self._jwt_util.decode(token=access_token, verify_exp=False)
         external_id: str | None = raw_access_token.get("id")
         if not external_id:
             return Err(JWTDecodeException())
@@ -54,7 +57,7 @@ class JWTService(BaseService):
 
     def _create_access_token(self, external_id: str) -> str:
         config = get_config()
-        return JWTUtil.encode(
+        return self._jwt_util.encode(
             subject=JWTSubjectKey.access,
             expire_delta=config.JWT_ACCESS_TOKEN_EXPIRE_DELTA,
             id=external_id,
@@ -62,14 +65,7 @@ class JWTService(BaseService):
 
     def _create_refresh_token(self) -> str:
         config = get_config()
-        return JWTUtil.encode(
+        return self._jwt_util.encode(
             subject=JWTSubjectKey.refresh,
             expire_delta=config.JWT_REFRESH_TOKEN_EXPIRE_DELTA,
         )
-
-    def verify(self, token: str) -> Result[None, JWTExpiredException | JWTDecodeException]:
-        try:
-            JWTUtil.decode(token=token)
-            return Ok(None)
-        except (JWTDecodeException, JWTExpiredException) as e:
-            return Err(e)

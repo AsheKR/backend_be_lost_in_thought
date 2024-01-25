@@ -14,6 +14,7 @@ class EnvironmentKey(StrEnum):
 
 class Env(StrEnum):
     local = "local"
+    test = "test"
     development = "development"
     production = "production"
 
@@ -45,6 +46,17 @@ class LocalConfig(Config):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta = timedelta(hours=7)
     JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta = timedelta(days=7)
+
+
+class TestConfig(LocalConfig):
+    SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
+        scheme="postgresql+asyncpg",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend_test",
+        port=5678,
+    )
 
 
 class DevelopmentConfig(Config):
@@ -85,6 +97,7 @@ class ProductionConfig(Config):
 def get_config() -> Config:
     config = {
         Env.local: LocalConfig,
+        Env.test: TestConfig,
         Env.development: DevelopmentConfig,
         Env.production: ProductionConfig,
     }[Env[os.getenv(EnvironmentKey.env, default=Env.local)]]()

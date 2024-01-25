@@ -4,18 +4,17 @@ version = "0.1.0"
 description = ""
 authors = ["Optimize Success <optimizesuccess4@gmail.com>"]
 readme = "README.md"
-packages = [{include = "diary_backend"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.101.1"
-uvicorn = {extras = ["standard"], version = "^0.23.2"}
+uvicorn = { extras = ["standard"], version = "^0.23.2" }
 click = "^8.1.7"
 pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.20"
 asyncpg = "^0.28.0"
 greenlet = "^2.0.2"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 orjson = "^3.9.5"
 result = "^0.13.1"
 mypy = "^1.5.1"
@@ -28,6 +27,18 @@ pre-commit = "^3.3.3"
 [tool.poetry.group.migration.dependencies]
 alembic = "^1.11.3"
 psycopg2-binary = "^2.9.7"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+pytest-randomly = "^3.15.0"
+pytest-mypy-plugins = "^3.0.0"
+pytest-asyncio = "^0.21.1"
+assertpy = "^1.1"
+coverage = "^7.3.1"
+freezegun = "^1.2.2"
+httpx = "^0.25.0"
+pytest-env = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -85,3 +96,40 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
+pythonpath = ["app"]
+testpaths = ["test"]
+norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__", "migration", "docker"]
+asyncio_mode = "auto"
+
+env = [
+    "ENV=test",
+]
+
+# Extra options:
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+]
+
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+skip_empty = true
+# Regexes for lines to exclude from consideration
+exclude_also = [# Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+]

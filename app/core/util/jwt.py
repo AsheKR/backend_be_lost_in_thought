@@ -29,9 +29,11 @@ class JWTDecodeException(JWTException):
 
 
 class JWTUtil:
-    @staticmethod
-    def encode(subject: str, expire_delta: timedelta, **kwargs: Unpack[EncodeKwargs]) -> str:
-        config = get_config()
+    def __init__(self, secret_key: str, algorithm: str):
+        self._secret_key = secret_key
+        self._algorithm = algorithm
+
+    def encode(self, subject: str, expire_delta: timedelta, **kwargs: Unpack[EncodeKwargs]) -> str:
         expire = datetime.utcnow() + expire_delta
         to_encode = {
             **kwargs,
@@ -40,18 +42,16 @@ class JWTUtil:
         }
         return jwt.encode(  # type: ignore
             claims=to_encode,
-            key=config.JWT_SECRET_KEY,
-            algorithm=config.JWT_ALGORITHM,
+            key=self._secret_key,
+            algorithm=self._algorithm,
         )
 
-    @staticmethod
-    def decode(token: str, verify_exp: bool = True) -> dict[str, Any]:
-        config = get_config()
+    def decode(self, token: str, verify_exp: bool = True) -> dict[str, Any]:
         try:
             return jwt.decode(  # type: ignore
                 token=token,
-                key=config.JWT_SECRET_KEY,
-                algorithms=config.JWT_ALGORITHM,
+                key=self._secret_key,
+                algorithms=self._algorithm,
                 options={"verify_exp": verify_exp},
             )
         except ExpiredSignatureError:
