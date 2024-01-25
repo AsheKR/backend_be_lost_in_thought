@@ -7,12 +7,10 @@ from domain.repository.question import QuestionModel, SuggestedQuestionModel
 from domain.repository.user import UserModel
 from domain.service.jwt import JWTService
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_recommendation_list_order_by_suggested_count_asc(
-    client: AsyncClient, session: async_scoped_session[AsyncSession]
-):
+async def test_recommendation_list_order_by_suggested_count_asc(client: AsyncClient, session: AsyncSession):
     user_model = UserModel()
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
@@ -53,7 +51,7 @@ async def test_recommendation_list_order_by_suggested_count_asc(
     assert_that(response_data[2]["external_id"]).is_equal_to(str(question_model1.external_id))
 
 
-async def test_recommendation_list_rotation(client: AsyncClient, session: async_scoped_session[AsyncSession]):
+async def test_recommendation_list_rotation(client: AsyncClient, session: AsyncSession):
     user_model = UserModel()
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()

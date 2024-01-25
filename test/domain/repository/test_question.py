@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 
 async def test_get_question_recommendation_list_order_by_suggested_count_asc(
-    session: async_scoped_session[AsyncSession],
+    session: AsyncSession,
 ):
     user_model = UserModel()
     question_model1 = QuestionModel()
@@ -42,7 +42,7 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
     assert_that(question_list[2].id).is_equal_to(question_model1.id)
 
 
-async def test_get_question_recommendation_list_rotation(session: async_scoped_session[AsyncSession]):
+async def test_get_question_recommendation_list_rotation(session: AsyncSession):
     user_model = UserModel()
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()

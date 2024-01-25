@@ -9,11 +9,10 @@ from domain.datasource.user import UserModel
 from domain.service.jwt import JWTService
 from freezegun import freeze_time
 from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_login(client: AsyncClient, session: async_scoped_session[AsyncSession]):
+async def test_login(client: AsyncClient, session: AsyncSession):
     user_model = UserModel()
     session.add(instance=user_model)
     await session.commit()
@@ -44,7 +43,7 @@ async def test_login_fail_when_external_id_does_not_exist(client: AsyncClient):
     assert_that(response_data["error_code"]).is_equal_to("AUTH__FAIL")
 
 
-async def test_refresh(config: Config, client: AsyncClient, session: async_scoped_session[AsyncSession]):
+async def test_refresh(config: Config, client: AsyncClient, session: AsyncSession):
     user_model = UserModel()
     session.add(instance=user_model)
     await session.commit()
@@ -86,7 +85,7 @@ async def test_refresh_fail_when_token_decode_exception(client: AsyncClient):
 
 
 async def test_refresh_fail_when_access_token_expired_exception(
-    config: Config, client: AsyncClient, session: async_scoped_session[AsyncSession]
+    config: Config, client: AsyncClient, session: AsyncSession
 ):
     user_model = UserModel()
     session.add(instance=user_model)

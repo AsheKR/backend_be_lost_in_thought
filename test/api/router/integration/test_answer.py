@@ -3,18 +3,18 @@ from http import HTTPStatus
 from assertpy import assert_that
 from core.config import get_config
 from core.util.jwt import JWTUtil
-from domain.repository.answer import AnswerModel, AnswerRepository
+from domain.repository.answer import AnswerModel
 from domain.repository.question import QuestionModel
 from domain.repository.user import UserModel
 from domain.service.jwt import JWTService
 from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def test_answer_pagination(
     client: AsyncClient,
-    session: async_scoped_session[AsyncSession],
+    session: AsyncSession,
 ):
     question_model = QuestionModel()
     user_model = UserModel()
@@ -114,7 +114,7 @@ async def test_answer_pagination(
 
 async def test_add(
     client: AsyncClient,
-    session: async_scoped_session[AsyncSession],
+    session: AsyncSession,
 ):
     user_model = UserModel()
     question_model = QuestionModel()
@@ -145,7 +145,7 @@ async def test_add(
 
 async def test_add_fail_when_question_not_found(
     client: AsyncClient,
-    session: async_scoped_session[AsyncSession],
+    session: AsyncSession,
 ):
     user_model = UserModel()
     session.add_all(
@@ -165,6 +165,153 @@ async def test_add_fail_when_question_not_found(
             "Authorization": f"JWT {jwt_schema.access_token}",
         },
         json={"answer": "answer"},
+    )
+
+    assert_that(response.status_code).is_equal_to(HTTPStatus.UNPROCESSABLE_ENTITY)
+
+
+async def test_edit(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add(
+        instance=answer_model,
+    )
+    await session.commit()
+
+    config = get_config()
+    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+
+    response = await client.patch(
+        url=f"/answer/{answer_model.external_id}",
+        headers={
+            "Authorization": f"JWT {jwt_schema.access_token}",
+        },
+        json={
+            "answer": "changed",
+        },
+    )
+
+    assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
+    result = await session.scalar(select(AnswerModel))
+    assert_that(result).is_not_none()
+    assert_that(result.answer).is_equal_to("changed")
+
+
+async def test_edit_fail_when_answer_not_found(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+
+    config = get_config()
+    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+
+    response = await client.patch(
+        url=f"/answer/answer_id",
+        headers={
+            "Authorization": f"JWT {jwt_schema.access_token}",
+        },
+        json={
+            "answer": "changed",
+        },
+    )
+
+    assert_that(response.status_code).is_equal_to(HTTPStatus.UNPROCESSABLE_ENTITY)
+
+
+async def test_delete(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add(
+        instance=answer_model,
+    )
+    await session.commit()
+
+    config = get_config()
+    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+
+    response = await client.delete(
+        url=f"/answer/{answer_model.external_id}",
+        headers={
+            "Authorization": f"JWT {jwt_schema.access_token}",
+        },
+    )
+
+    assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
+    result = await session.scalar(select(AnswerModel))
+    assert_that(result).is_none()
+
+
+async def test_delete_fail_when_answer_not_found(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add(
+        instance=answer_model,
+    )
+    await session.commit()
+
+    config = get_config()
+    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+
+    response = await client.delete(
+        url=f"/answer/answer_id",
+        headers={
+            "Authorization": f"JWT {jwt_schema.access_token}",
+        },
     )
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.UNPROCESSABLE_ENTITY)

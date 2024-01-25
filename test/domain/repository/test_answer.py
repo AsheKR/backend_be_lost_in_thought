@@ -4,10 +4,10 @@ from domain.datasource.question import QuestionModel
 from domain.datasource.user import UserModel
 from domain.repository.answer import AnswerRepository
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_answer_pagination(session: async_scoped_session[AsyncSession]):
+async def test_answer_pagination(session: AsyncSession):
     answer_repository = AnswerRepository(session=session)
     question_model = QuestionModel()
     user_model = UserModel()
@@ -93,7 +93,7 @@ async def test_answer_pagination(session: async_scoped_session[AsyncSession]):
     assert_that(answer_list).is_length(0)
 
 
-async def test_add(session: async_scoped_session[AsyncSession]):
+async def test_add(session: AsyncSession):
     answer_repository = AnswerRepository(session=session)
     user_model = UserModel()
     question_model = QuestionModel()
@@ -108,7 +108,7 @@ async def test_add(session: async_scoped_session[AsyncSession]):
         question_id=question_model.id,
         user_id=user_model.id,
     )
-    await answer_repository.add(answer=answer_model)
+    await answer_repository.add(answer_model=answer_model)
     await session.commit()
 
     result = await session.scalar(select(AnswerModel).where(AnswerModel.id == answer_model.id))
@@ -116,7 +116,7 @@ async def test_add(session: async_scoped_session[AsyncSession]):
     assert_that(result).is_not_none()
 
 
-async def test_edit(session: async_scoped_session[AsyncSession]):
+async def test_edit(session: AsyncSession):
     answer_repository = AnswerRepository(session=session)
     user_model = UserModel()
     question_model = QuestionModel()
@@ -135,14 +135,39 @@ async def test_edit(session: async_scoped_session[AsyncSession]):
         instance=answer_model,
     )
     await session.commit()
-    await answer_repository.edit(
-        answer_external_id=answer_model.external_id,
-        user_id=user_model.id,
-        answer='changed'
+    await answer_repository.edit(answer_model=answer_model, answer="changed")
+    await session.commit()
+
+    result = await session.scalar(select(AnswerModel))
+
+    assert_that(result).is_not_none()
+    assert_that(result.answer).is_equal_to("changed")
+
+
+async def test_delete(session: AsyncSession):
+    answer_repository = AnswerRepository(session=session)
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add(
+        instance=answer_model,
+    )
+    await session.commit()
+    await answer_repository.delete(
+        answer_model=answer_model,
     )
     await session.commit()
 
     result = await session.scalar(select(AnswerModel).where(AnswerModel.id == answer_model.id))
 
-    assert_that(result).is_not_none()
-    assert_that(result.answer).is_equal_to('changed')
+    assert_that(result).is_none()

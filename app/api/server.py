@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 from api.exception import APIException, APIExceptionSchema
-from api.router.answer.router import answer_router
+from api.router.answer.router import answer_detail_router, answer_router
 from api.router.auth.router import auth_router
 from api.router.question.router import question_router
 from api.router.question.string import QuestionEndPoint
@@ -31,6 +31,7 @@ def _init_router(fast_api_: FastAPI) -> None:
 
     fast_api_.include_router(auth_router, prefix=RootEndPoint.auth)
     fast_api_.include_router(question_router, prefix=RootEndPoint.question)
+    fast_api_.include_router(answer_detail_router, prefix=RootEndPoint.answer)
 
 
 def _init_listener(fast_api_: FastAPI) -> None:

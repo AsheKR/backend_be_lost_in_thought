@@ -8,6 +8,7 @@ from core.config import Config, Env, EnvironmentKey, get_config
 from core.db.model import BaseModel
 from core.db.session import DatabaseSessionManager, db_manager, get_session
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture(scope="session")
@@ -27,9 +28,14 @@ def logger():
     yield logger
 
 
-@pytest.fixture(scope="session")
-async def client():
+@pytest.fixture(scope="function")
+async def client(session: AsyncSession):
     async with AsyncClient(app=fast_api, base_url="http://test") as ac:
+
+        async def _get_session():
+            yield session
+
+        fast_api.dependency_overrides[get_session] = _get_session
         yield ac
 
 

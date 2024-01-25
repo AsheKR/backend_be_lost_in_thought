@@ -6,6 +6,7 @@ class RootEndPoint(StrEnum):
     redoc = "/redoc"
     auth = "/auth"
     question = "/question"
+    answer = "/answer"
 
 
 class APIDocString(StrEnum):
