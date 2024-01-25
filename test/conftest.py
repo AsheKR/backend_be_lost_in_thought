@@ -4,8 +4,9 @@ import os
 
 import pytest
 from api.server import fast_api
-from core.config import Env, EnvironmentKey, get_config
-from core.db.session import get_session
+from core.config import Config, Env, EnvironmentKey, get_config
+from core.db.model import BaseModel
+from core.db.session import DatabaseSessionManager, db_manager, get_session
 from httpx import AsyncClient
 
 
@@ -37,12 +38,19 @@ async def config():
     return get_config()
 
 
+@pytest.fixture(scope="session")
+async def database_session_manager(config: Config) -> DatabaseSessionManager:
+    db_manager.init(db_url=str(config.SQLALCHEMY_DATABASE_URI))
+    yield db_manager
+    await db_manager.close()
+
+
 @pytest.fixture(scope="function")
-async def session(logger: logging.Logger):
-    session = get_session()
-    connection = await session.connection()
+async def session(database_session_manager: DatabaseSessionManager):
+    async with database_session_manager.session() as session:
+        yield session
 
-    yield session
-
-    await connection.rollback()
-    await connection.close()
+    async with database_session_manager.session() as session:
+        for table in reversed(BaseModel.metadata.sorted_tables):
+            await session.execute(table.delete())
+        await session.commit()

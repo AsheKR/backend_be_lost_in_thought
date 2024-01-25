@@ -39,7 +39,6 @@ pytest-env = "^1.0.1"
 
 [tool.poetry.group.lint.dependencies]
 black = "^23.9.1"
-flake8 = "^6.1.0"
 mypy = "^1.5.1"
 pyupgrade = "^3.11.0"
 isort = {extras = ["colors"], version = "^5.12.0"}

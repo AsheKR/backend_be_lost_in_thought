@@ -5,17 +5,18 @@ from uuid import uuid4
 from assertpy import assert_that
 from core.config import Config
 from core.util.jwt import JWTUtil
-from domain.repository.user import UserModel
+from domain.datasource.user import UserModel
 from domain.service.jwt import JWTService
 from freezegun import freeze_time
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 
 async def test_login(client: AsyncClient, session: async_scoped_session[AsyncSession]):
     user_model = UserModel()
     session.add(instance=user_model)
-    await session.flush()
+    await session.commit()
 
     response = await client.post(
         url="/auth/login",
@@ -46,7 +47,7 @@ async def test_login_fail_when_external_id_does_not_exist(client: AsyncClient):
 async def test_refresh(config: Config, client: AsyncClient, session: async_scoped_session[AsyncSession]):
     user_model = UserModel()
     session.add(instance=user_model)
-    await session.flush()
+    await session.commit()
 
     jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
     with freeze_time(datetime.utcnow() - config.JWT_ACCESS_TOKEN_EXPIRE_DELTA - timedelta(hours=1)):
@@ -89,7 +90,7 @@ async def test_refresh_fail_when_access_token_expired_exception(
 ):
     user_model = UserModel()
     session.add(instance=user_model)
-    await session.flush()
+    await session.commit()
 
     jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
     with freeze_time(datetime.utcnow() - config.JWT_REFRESH_TOKEN_EXPIRE_DELTA - timedelta(hours=1)):

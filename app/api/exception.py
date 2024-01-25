@@ -47,3 +47,9 @@ class UnauthorizedException(APIException):
     status_code = HTTPStatus.UNAUTHORIZED.value
     error_code = HTTPStatus.UNAUTHORIZED.phrase
     message = HTTPStatus.UNAUTHORIZED.description
+
+
+class UnprocessableEntity(APIException):
+    status_code = HTTPStatus.UNPROCESSABLE_ENTITY.value
+    error_code = HTTPStatus.UNPROCESSABLE_ENTITY.phrase
+    message = HTTPStatus.UNPROCESSABLE_ENTITY.description

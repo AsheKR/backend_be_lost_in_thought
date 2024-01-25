@@ -12,33 +12,37 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials
 from fastapi.security.utils import get_authorization_scheme_param
 from result import Err
+from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 from starlette.status import HTTP_403_FORBIDDEN
 
 AuthorizationHeader = APIKeyHeader(name="Authorization", scheme_name="JWT")
 
 
-async def get_authorization_credential(
-    auto_error: bool = False, authorization: str = Security(AuthorizationHeader)
-) -> Optional[HTTPAuthorizationCredentials]:
-    scheme, credentials = get_authorization_scheme_param(authorization)
-    if not (authorization and scheme and credentials):
-        if auto_error:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authenticated")
-        else:
-            return None
-    if scheme.lower() != "jwt":
-        if auto_error:
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN,
-                detail="Invalid authentication credentials",
-            )
-        else:
-            return None
-    return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
+class AuthorizationCredential:
+    def __init__(self, auto_error: bool = False):
+        self._auto_error = auto_error
+
+    def __call__(self, authorization: str = Security(AuthorizationHeader)) -> Optional[HTTPAuthorizationCredentials]:
+        scheme, credentials = get_authorization_scheme_param(authorization)
+        if not (authorization and scheme and credentials):
+            if self._auto_error:
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authenticated")
+            else:
+                return None
+        if scheme.lower() != "jwt":
+            if self._auto_error:
+                raise HTTPException(
+                    status_code=HTTP_403_FORBIDDEN,
+                    detail="Invalid authentication credentials",
+                )
+            else:
+                return None
+        return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
 
 
 async def get_current_user(
-    credential: Optional[HTTPAuthorizationCredentials] = Depends(get_authorization_credential),
+    session: AsyncSession = Depends(get_session),
+    credential: Optional[HTTPAuthorizationCredentials] = Depends(AuthorizationCredential(auto_error=True)),
 ) -> Optional[UserSchema]:
     if not credential:
         return None
@@ -63,7 +67,6 @@ async def get_current_user(
     claim: dict[str, Any] = jwt_decode_result.ok_value
     external_id = claim["sub"]
 
-    session = get_session()
     user_repository = UserRepository(session=session)
     user_service = UserService(user_repository=user_repository)
     user_schema = await user_service.find_first_by_external_id(external_id=external_id)

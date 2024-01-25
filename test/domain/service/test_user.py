@@ -42,5 +42,5 @@ async def test_add():
         user_repository = UserRepository(session=Any)
         user_service = UserService(user_repository=user_repository)
 
-        await user_service.create_user()
+        await user_service.add()
         add.assert_awaited_once()

@@ -10,7 +10,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 
-async def test_get_question_recommendation_list_order_by_suggested_count_asc(
+async def test_recommendation_list_order_by_suggested_count_asc(
     client: AsyncClient, session: async_scoped_session[AsyncSession]
 ):
     user_model = UserModel()
@@ -25,7 +25,7 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
             question_model3,
         ]
     )
-    await session.flush()
+    await session.commit()
     session.add_all(
         instances=[
             SuggestedQuestionModel(question_id=question_model1.id, user_id=user_model.id),
@@ -33,7 +33,7 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
             SuggestedQuestionModel(question_id=question_model2.id, user_id=user_model.id),
         ]
     )
-    await session.flush()
+    await session.commit()
 
     config = get_config()
     jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
@@ -53,9 +53,7 @@ async def test_get_question_recommendation_list_order_by_suggested_count_asc(
     assert_that(response_data[2]["external_id"]).is_equal_to(str(question_model1.external_id))
 
 
-async def test_get_question_recommendation_list_rotation(
-    client: AsyncClient, session: async_scoped_session[AsyncSession]
-):
+async def test_recommendation_list_rotation(client: AsyncClient, session: async_scoped_session[AsyncSession]):
     user_model = UserModel()
     question_model1 = QuestionModel()
     question_model2 = QuestionModel()
@@ -74,7 +72,7 @@ async def test_get_question_recommendation_list_rotation(
             question_model6,
         ]
     )
-    await session.flush()
+    await session.commit()
 
     config = get_config()
     jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)

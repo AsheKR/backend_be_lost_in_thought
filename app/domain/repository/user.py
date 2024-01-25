@@ -1,19 +1,7 @@
-from typing import TYPE_CHECKING
-
 from core.db.model import BaseModel
+from domain.datasource.user import UserModel
 from domain.repository.base import BaseRepository
-from domain.string import TableName
 from sqlalchemy import select
-from sqlalchemy.orm import Mapped, relationship
-
-if TYPE_CHECKING:
-    from domain.repository.question import SuggestedQuestionModel
-
-
-class UserModel(BaseModel):
-    __tablename__ = TableName.user
-
-    suggested_question_list: Mapped["SuggestedQuestionModel"] = relationship(back_populates="user")
 
 
 class UserRepository(BaseRepository):

@@ -2,7 +2,7 @@ from api.router.auth.exception import AuthFailException, JWTDecodeAPIException, 
 from api.router.auth.request import LoginRequest, RefreshRequest
 from api.router.auth.response import LoginResponse
 from api.router.auth.string import AuthEndPoint
-from api.util import get_authorization_credential
+from api.util import AuthorizationCredential
 from core.config import get_config
 from core.db.session import get_session
 from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTUtil
@@ -12,6 +12,7 @@ from domain.service.user import UserService
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from result import Err
+from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 auth_router = APIRouter()
 
@@ -25,8 +26,10 @@ def _get_jwt_util() -> JWTUtil:
 
 
 @auth_router.post(path=AuthEndPoint.login)
-async def login(request: LoginRequest) -> LoginResponse:
-    session = get_session()
+async def login(
+    request: LoginRequest,
+    session: AsyncSession = Depends(get_session),
+) -> LoginResponse:
     user_repository = UserRepository(
         session=session,
     )
@@ -46,7 +49,8 @@ async def login(request: LoginRequest) -> LoginResponse:
 
 @auth_router.post(path=AuthEndPoint.refresh)
 async def refresh(
-    request: RefreshRequest, credential: HTTPAuthorizationCredentials = Depends(get_authorization_credential)
+    request: RefreshRequest,
+    credential: HTTPAuthorizationCredentials = Depends(AuthorizationCredential(auto_error=True)),
 ) -> LoginResponse:
     jwt_util = _get_jwt_util()
     jwt_scheme_result = JWTService(
