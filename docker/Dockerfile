@@ -33,4 +33,4 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry/cache \
 COPY /app /app
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "api.server:fast_api"]
+CMD ["python", "main.py"]
