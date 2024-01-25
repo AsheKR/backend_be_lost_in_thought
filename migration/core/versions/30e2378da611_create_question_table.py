@@ -41,6 +41,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("suggested_question")
     op.drop_table("question_translation")
     op.drop_table("question")
