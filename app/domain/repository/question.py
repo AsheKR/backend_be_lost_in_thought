@@ -79,7 +79,7 @@ class QuestionRepository(BaseRepository):
                 AnswerModel.create_datetime >= start_datetime,
                 AnswerModel.create_datetime <= end_datetime,
             )
-            .order_by(AnswerModel.id.desc())
+            .order_by(AnswerModel.create_datetime.desc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
