@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Select the environment
+        options:
+          - development
+          - production
+
+jobs:
+  deploy:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: docker/setup-buildx-action@v1
+
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GC_WIF_PROVIDER }}
+          service_account: ${{ secrets.GC_WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GC_PROJECT_ID }}
+
+      - name: Docker auth
+        run: |
+          gcloud auth configure-docker ${{ secrets.GC_AR_LOCATION }}-docker.pkg.dev
+
+      - uses: docker/build-push-action@v4
+        with:
+          file: ./docker/Dockerfile
+          tags: ${{ secrets.GC_AR_LOCATION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/${{ secrets.GC_REGISTRY_NAME }}/${{ github.event.inputs.environment }}:${{ github.sha }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha
+
+      - uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ secrets.GC_SERVICE_NAME }}-${{ github.event.inputs.environment }}
+          region: ${{ secrets.GC_AR_LOCATION }}
+          image: ${{ secrets.GC_AR_LOCATION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/${{ secrets.GC_REGISTRY_NAME }}/${{ github.event.inputs.environment }}:${{ github.sha }}
