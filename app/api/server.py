@@ -2,6 +2,8 @@ from typing import AsyncIterator
 
 from contextlib import asynccontextmanager
 
+import sentry_sdk
+
 from api.exception import APIException, APIExceptionSchema
 from api.router.answer.router import answer_detail_router, answer_router
 from api.router.auth.router import auth_router
@@ -54,6 +56,11 @@ def _init_listener(fast_api_: FastAPI) -> None:
 
 def create_fast_api() -> FastAPI:
     config = get_config()
+
+    sentry_sdk.init(
+        dsn=config.SENTRY_DSN,
+        environment=config.ENV,
+    )
 
     fast_api_ = FastAPI(
         title=APIDocString.label,

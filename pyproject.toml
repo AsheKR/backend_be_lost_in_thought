@@ -18,6 +18,7 @@ python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 orjson = "^3.9.5"
 result = "^0.13.1"
 mypy = "^1.5.1"
+sentry-sdk = {extras = ["fastapi"], version = "^1.31.0"}
 
 
 [tool.poetry.group.migration.dependencies]

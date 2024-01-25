@@ -2,8 +2,9 @@ import os
 from datetime import timedelta
 from enum import StrEnum
 from functools import lru_cache
+from typing import Union
 
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, HttpUrl
 from pydantic_settings import BaseSettings
 
 
@@ -25,6 +26,7 @@ class Config(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     SQLALCHEMY_DATABASE_URI: PostgresDsn
+    SENTRY_DSN: Union[str, HttpUrl]
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
     JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta
@@ -44,6 +46,7 @@ class LocalConfig(Config):
         path="backend",
         port=5678,
     )
+    SENTRY_DSN: str = ""
     JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta = timedelta(hours=7)
