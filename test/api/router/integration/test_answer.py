@@ -1,14 +1,12 @@
 from http import HTTPStatus
 
 from assertpy import assert_that
-from core.config import get_config
-from core.util.jwt import JWTUtil
 from domain.repository.answer import AnswerModel
 from domain.repository.question import QuestionModel
 from domain.repository.user import UserModel
-from domain.service.jwt import JWTSchema, JWTService
+from domain.service.jwt import JWTSchema
 from httpx import AsyncClient
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

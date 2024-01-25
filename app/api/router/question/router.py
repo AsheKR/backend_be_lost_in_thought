@@ -5,7 +5,7 @@ from api.util import get_current_user
 from core.db.session import get_session
 from domain.repository.question import QuestionRepository
 from domain.service.question import QuestionService
-from domain.service.user import UserSchema
+from domain.service.user import InternalUserSchema
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
@@ -16,7 +16,7 @@ question_router = APIRouter()
 async def answered_question_list(
     limit: int = 20,
     offset: int = 0,
-    user: UserSchema = Depends(get_current_user),
+    user: InternalUserSchema = Depends(get_current_user),
     question_service: QuestionService = Depends(get_question_service),
 ) -> list[AnsweredQuestionResponse]:
     _answered_question_list = await question_service.answered_list(
@@ -35,7 +35,7 @@ async def answered_question_list(
 
 @question_router.get(path=QuestionEndPoint.recommendation)
 async def recommendation_list(
-    user: UserSchema = Depends(get_current_user),
+    user: InternalUserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     question_service: QuestionService = Depends(get_question_service),
 ) -> list[QuestionResponse]:

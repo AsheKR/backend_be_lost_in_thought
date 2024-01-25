@@ -69,3 +69,8 @@ class AnswerService(BaseService):
 
         await self._answer_repository.delete(answer_model=answer_model)
         return Ok(None)
+
+    async def delete_all(self, user_id: int) -> None:
+        await self._answer_repository.delete_all(
+            user_id=user_id,
+        )

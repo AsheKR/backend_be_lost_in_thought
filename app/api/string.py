@@ -7,6 +7,7 @@ class RootEndPoint(StrEnum):
     auth = "/auth"
     question = "/question"
     answer = "/answer"
+    delete_all = "/delete-all"
 
 
 class APIDocString(StrEnum):

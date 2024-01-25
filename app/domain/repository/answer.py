@@ -5,7 +5,7 @@ from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel
 from domain.datasource.user import UserModel
 from domain.repository.base import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 
 class AnswerRepository(BaseRepository):
@@ -46,3 +46,9 @@ class AnswerRepository(BaseRepository):
     async def delete(self, answer_model: AnswerModel) -> None:
         answer_model.delete_datetime = datetime.now()
         self._session.add(answer_model)
+
+    async def delete_all(self, user_id: int) -> None:
+        query = update(AnswerModel).where(AnswerModel.delete_datetime == None, AnswerModel.user_id == user_id).values({
+            AnswerModel.delete_datetime: datetime.now(),
+        })
+        await self._session.execute(query)

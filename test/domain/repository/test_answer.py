@@ -217,3 +217,42 @@ async def test_delete(session: AsyncSession):
 
     assert_that(result).is_not_none()
     assert_that(result.delete_datetime).is_not_none()
+
+
+async def test_delete_all(session: AsyncSession):
+    answer_repository = AnswerRepository(session=session)
+    user_model = UserModel()
+    question_model = QuestionModel()
+    session.add_all(
+        instances=[
+            user_model,
+            question_model,
+        ]
+    )
+    await session.commit()
+    answer_model1 = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    answer_model2 = AnswerModel(
+        question=question_model,
+        user=user_model,
+    )
+    session.add_all(
+        instances=[
+            answer_model1,
+            answer_model2,
+        ],
+    )
+    await session.commit()
+    await answer_repository.delete_all(
+        user_id=user_model.id,
+    )
+    await session.commit()
+
+    scalar_result = await session.scalars(select(AnswerModel).where(AnswerModel.user_id == user_model.id))
+    result = scalar_result.all()
+
+    assert_that(result).is_length(2)
+    assert_that(result[0].delete_datetime).is_not_none()
+    assert_that(result[1].delete_datetime).is_not_none()

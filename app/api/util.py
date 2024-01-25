@@ -7,7 +7,7 @@ from core.db.session import get_session
 from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTUtil
 from domain.repository.user import UserRepository
 from domain.service.jwt import JWTService
-from domain.service.user import UserSchema, UserService
+from domain.service.user import InternalUserSchema, UserService
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials
 from fastapi.security.utils import get_authorization_scheme_param
@@ -43,7 +43,7 @@ class AuthorizationCredential:
 async def get_current_user(
     session: AsyncSession = Depends(get_session),
     credential: Optional[HTTPAuthorizationCredentials] = Depends(AuthorizationCredential(auto_error=True)),
-) -> Optional[UserSchema]:
+) -> Optional[InternalUserSchema]:
     if not credential:
         return None
 
