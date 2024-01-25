@@ -1,6 +1,6 @@
 from enum import StrEnum
 
 
-class SupportManufacturer(StrEnum):
+class SupportOS(StrEnum):
     ANDROID = "Android"
     IOS = "iOS"

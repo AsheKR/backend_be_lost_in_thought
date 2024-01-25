@@ -1,8 +1,8 @@
 from api.depdendency import get_config
 from api.router.version.string import VersionEndPoint
-from api.util.header import get_app_version, get_device_manufacturer
+from api.util.header import get_app_version, get_os_name
 from core.config import Config
-from core.maufacturer import SupportManufacturer
+from core.support_os import SupportOS
 from fastapi import APIRouter, Depends
 
 version_router = APIRouter()
@@ -12,13 +12,13 @@ version_router = APIRouter()
 async def can_update(
     config: Config = Depends(get_config),
     app_version: str = Depends(get_app_version),
-    device_manufacturer: SupportManufacturer = Depends(get_device_manufacturer),
+    os_name: SupportOS = Depends(get_os_name),
 ) -> bool:
-    if device_manufacturer == SupportManufacturer.ANDROID:
+    if os_name == SupportOS.ANDROID:
         if config.ANDROID_LATEST_VERSION > app_version:
             return True
 
-    if device_manufacturer == SupportManufacturer.IOS:
+    if os_name == SupportOS.IOS:
         if config.IOS_LATEST_VERSION > app_version:
             return True
 

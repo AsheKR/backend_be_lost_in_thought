@@ -11,7 +11,7 @@ async def test_can_update_android(client: AsyncClient, config: Config):
     response = await client.get(
         url=f"/can-update",
         headers={
-            'x-device-manufacturer': 'Android',
+            'x-os-name': 'Android',
             'x-app-version': f'{major}.{minor}.{patch - 1}',
         }
     )
@@ -24,7 +24,7 @@ async def test_can_not_update_android(client: AsyncClient, config: Config):
     response = await client.get(
         url=f"/can-update",
         headers={
-            'x-device-manufacturer': 'Android',
+            'x-os-name': 'Android',
             'x-app-version': config.ANDROID_LATEST_VERSION,
         }
     )
@@ -38,7 +38,7 @@ async def test_can_update_ios(client: AsyncClient, config: Config):
     response = await client.get(
         url=f"/can-update",
         headers={
-            'x-device-manufacturer': 'iOS',
+            'x-os-name': 'iOS',
             'x-app-version': f'{major}.{minor}.{patch - 1}',
         }
     )
@@ -51,7 +51,7 @@ async def test_can_not_update_ios(client: AsyncClient, config: Config):
     response = await client.get(
         url=f"/can-update",
         headers={
-            'x-device-manufacturer': 'iOS',
+            'x-os-name': 'iOS',
             'x-app-version': config.IOS_LATEST_VERSION,
         }
     )

@@ -1,14 +1,14 @@
 from typing import Annotated
 
-from core.maufacturer import SupportManufacturer
+from core.support_os import SupportOS
 from fastapi import Header
 
 
-async def get_device_manufacturer(
-    x_device_manufacturer: Annotated[str | None, Header()] = None
-) -> SupportManufacturer | None:
+async def get_os_name(
+    x_os_name: Annotated[str | None, Header()] = None
+) -> SupportOS | None:
     try:
-        return SupportManufacturer[x_device_manufacturer.upper()]
+        return SupportOS[x_os_name.upper()]
     except KeyError:
         pass
 
