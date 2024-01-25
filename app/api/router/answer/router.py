@@ -38,6 +38,7 @@ async def _list(
         AnswerResponse(
             id=answer.external_id,
             answer=answer.answer,
+            create_datetime=answer.create_datetime,
         )
         for answer in answer_list
     ]

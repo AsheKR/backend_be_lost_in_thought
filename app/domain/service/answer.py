@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from domain.datasource.answer import AnswerModel
@@ -11,6 +12,7 @@ from result import Err, Ok, Result
 class AnswerSchema(BaseModel):
     external_id: UUID4
     answer: str
+    create_datetime: datetime
 
 
 class InternalAnswerSchema(BaseModel):
@@ -32,6 +34,7 @@ class AnswerService(BaseService):
             AnswerSchema(
                 external_id=answer.external_id,
                 answer=answer.answer,
+                create_datetime=answer.create_datetime,
             )
             for answer in answer_list
         ]
