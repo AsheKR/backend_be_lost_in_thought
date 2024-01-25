@@ -6,17 +6,13 @@ from assertpy import assert_that
 from core.config import Config
 from core.util.jwt import JWTUtil
 from domain.datasource.user import UserModel
-from domain.service.jwt import JWTService
+from domain.service.jwt import JWTService, JWTSchema
 from freezegun import freeze_time
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def test_login(client: AsyncClient, session: AsyncSession):
-    user_model = UserModel()
-    session.add(instance=user_model)
-    await session.commit()
-
+async def test_login(client: AsyncClient, user_model: UserModel):
     response = await client.post(
         url="/auth/login",
         json={
@@ -43,14 +39,9 @@ async def test_login_fail_when_external_id_does_not_exist(client: AsyncClient):
     assert_that(response_data["error_code"]).is_equal_to("AUTH__FAIL")
 
 
-async def test_refresh(config: Config, client: AsyncClient, session: AsyncSession):
-    user_model = UserModel()
-    session.add(instance=user_model)
-    await session.commit()
-
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+async def test_refresh(config: Config, client: AsyncClient, user_model: UserModel, jwt_service: JWTService):
     with freeze_time(datetime.utcnow() - config.JWT_ACCESS_TOKEN_EXPIRE_DELTA - timedelta(hours=1)):
-        jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+        jwt_schema = jwt_service.create(external_id=str(user_model.external_id))
 
     response = await client.post(
         url="/auth/refresh",
@@ -85,15 +76,10 @@ async def test_refresh_fail_when_token_decode_exception(client: AsyncClient):
 
 
 async def test_refresh_fail_when_access_token_expired_exception(
-    config: Config, client: AsyncClient, session: AsyncSession
+config: Config, client: AsyncClient, user_model: UserModel, jwt_service: JWTService,
 ):
-    user_model = UserModel()
-    session.add(instance=user_model)
-    await session.commit()
-
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
     with freeze_time(datetime.utcnow() - config.JWT_REFRESH_TOKEN_EXPIRE_DELTA - timedelta(hours=1)):
-        jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
+        jwt_schema = jwt_service.create(external_id=str(user_model.external_id))
 
     response = await client.post(
         url="/auth/refresh",

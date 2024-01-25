@@ -38,7 +38,7 @@ async def list(
     )
     return [
         AnswerResponse(
-            external_id=answer.external_id,
+            id=answer.external_id,
             answer=answer.answer,
         )
         for answer in answer_list

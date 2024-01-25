@@ -12,6 +12,11 @@ class InternalQuestionSchema(BaseModel):
     id: int
 
 
+class AnsweredQuestionSchema(BaseModel):
+    id: UUID4
+    question: str
+
+
 class QuestionService(BaseService):
     def __init__(self, question_repository: QuestionRepository):
         self._question_repository = question_repository
@@ -24,6 +29,21 @@ class QuestionService(BaseService):
         return InternalQuestionSchema(
             id=question_model.id,
         )
+
+    async def answered_list(self, user_id: int, limit: int, offset: int) -> list[AnsweredQuestionSchema]:
+        question_list = await self._question_repository.answered_list(
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
+        return [
+            AnsweredQuestionSchema(
+                id=question.external_id,
+                question=question.question,
+            )
+            for question in question_list
+        ]
 
     async def recommendation_list(self, user_id: int) -> list[QuestionSchema]:
         question_list = await self._question_repository.recommendation_list(

@@ -6,7 +6,7 @@ from core.util.jwt import JWTUtil
 from domain.repository.answer import AnswerModel
 from domain.repository.question import QuestionModel
 from domain.repository.user import UserModel
-from domain.service.jwt import JWTService
+from domain.service.jwt import JWTService, JWTSchema
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,13 +15,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 async def test_answer_pagination(
     client: AsyncClient,
     session: AsyncSession,
+    jwt_schema: JWTSchema,
+    user_model: UserModel,
 ):
     question_model = QuestionModel()
-    user_model = UserModel()
     session.add_all(
         instances=[
             question_model,
-            user_model,
         ]
     )
     answer_model1 = AnswerModel(
@@ -60,10 +60,6 @@ async def test_answer_pagination(
     )
     await session.commit()
 
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
-
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2",
         headers={
@@ -73,8 +69,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["external_id"]).is_equal_to(str(answer_model1.external_id))
-    assert_that(response_data[1]["external_id"]).is_equal_to(str(answer_model2.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model1.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model2.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=2",
@@ -85,8 +81,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["external_id"]).is_equal_to(str(answer_model3.external_id))
-    assert_that(response_data[1]["external_id"]).is_equal_to(str(answer_model4.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model3.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model4.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=4",
@@ -97,8 +93,8 @@ async def test_answer_pagination(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
-    assert_that(response_data[0]["external_id"]).is_equal_to(str(answer_model5.external_id))
-    assert_that(response_data[1]["external_id"]).is_equal_to(str(answer_model6.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(answer_model5.external_id))
+    assert_that(response_data[1]["id"]).is_equal_to(str(answer_model6.external_id))
 
     response = await client.get(
         url=f"/question/{question_model.external_id}/answer?limit=2&offset=6",
@@ -115,20 +111,15 @@ async def test_answer_pagination(
 async def test_add(
     client: AsyncClient,
     session: AsyncSession,
+    jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
     question_model = QuestionModel()
     session.add_all(
         instances=[
-            user_model,
             question_model,
         ]
     )
     await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
 
     response = await client.post(
         url=f"/question/{question_model.external_id}/answer",
@@ -145,20 +136,8 @@ async def test_add(
 
 async def test_add_fail_when_question_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
-    session.add_all(
-        instances=[
-            user_model,
-        ]
-    )
-    await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
-
     response = await client.post(
         url=f"/question/question_id/answer",
         headers={
@@ -173,12 +152,12 @@ async def test_add_fail_when_question_not_found(
 async def test_edit(
     client: AsyncClient,
     session: AsyncSession,
+        user_model: UserModel,
+        jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
     question_model = QuestionModel()
     session.add_all(
         instances=[
-            user_model,
             question_model,
         ]
     )
@@ -191,10 +170,6 @@ async def test_edit(
         instance=answer_model,
     )
     await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
 
     response = await client.patch(
         url=f"/answer/{answer_model.external_id}",
@@ -215,20 +190,15 @@ async def test_edit(
 async def test_edit_fail_when_answer_not_found(
     client: AsyncClient,
     session: AsyncSession,
+        jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
     question_model = QuestionModel()
     session.add_all(
         instances=[
-            user_model,
             question_model,
         ]
     )
     await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
 
     response = await client.patch(
         url=f"/answer/answer_id",
@@ -246,12 +216,12 @@ async def test_edit_fail_when_answer_not_found(
 async def test_delete(
     client: AsyncClient,
     session: AsyncSession,
+        user_model: UserModel,
+        jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
     question_model = QuestionModel()
     session.add_all(
         instances=[
-            user_model,
             question_model,
         ]
     )
@@ -264,10 +234,6 @@ async def test_delete(
         instance=answer_model,
     )
     await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
 
     response = await client.delete(
         url=f"/answer/{answer_model.external_id}",
@@ -284,12 +250,12 @@ async def test_delete(
 async def test_delete_fail_when_answer_not_found(
     client: AsyncClient,
     session: AsyncSession,
+        user_model: UserModel,
+        jwt_schema: JWTSchema,
 ):
-    user_model = UserModel()
     question_model = QuestionModel()
     session.add_all(
         instances=[
-            user_model,
             question_model,
         ]
     )
@@ -302,10 +268,6 @@ async def test_delete_fail_when_answer_not_found(
         instance=answer_model,
     )
     await session.commit()
-
-    config = get_config()
-    jwt_util = JWTUtil(secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_model.external_id))
 
     response = await client.delete(
         url=f"/answer/answer_id",

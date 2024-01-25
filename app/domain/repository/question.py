@@ -1,3 +1,4 @@
+from domain.datasource.answer import AnswerModel
 from domain.datasource.question import QuestionModel, SuggestedQuestionModel
 from domain.repository.base import BaseRepository
 from sqlalchemy import select
@@ -8,6 +9,20 @@ class QuestionRepository(BaseRepository):
     async def find_first_by_external_id(self, external_id: str) -> QuestionModel | None:
         query = select(QuestionModel).where(QuestionModel.external_id == external_id)
         return await self._session.scalar(query)  # type: ignore
+
+    async def answered_list(self, user_id: int, limit: int, offset: int) -> list[QuestionModel]:
+        query = (
+            select(AnswerModel)
+            .join(QuestionModel)
+            .where(AnswerModel.user_id == user_id)
+            .order_by(AnswerModel.id)
+            .limit(limit=limit)
+            .offset(offset=offset)
+        )
+        scalar_result = await self._session.scalars(query)
+        result = scalar_result.all()
+
+        return [element.question for element in result]
 
     async def recommendation_list(self, user_id: int, limit: int) -> list[QuestionModel]:
         suggested_subquery = (
@@ -32,8 +47,8 @@ class QuestionRepository(BaseRepository):
             )
             .limit(limit)
         )
-        scalarResult = await self._session.scalars(query)
-        result = scalarResult.all()
+        scalar_result = await self._session.scalars(query)
+        result = scalar_result.all()
 
         self._session.add_all(
             instances=[
