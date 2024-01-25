@@ -1,14 +1,9 @@
-from typing import Any, TypedDict, Unpack
+from typing import Any
 
 from datetime import datetime, timedelta
 from enum import StrEnum
 
-from core.config import get_config
 from jose import ExpiredSignatureError, JWTError, jwt
-
-
-class EncodeKwargs(TypedDict, total=False):
-    id: str
 
 
 class JWTKey(StrEnum):
@@ -33,10 +28,9 @@ class JWTUtil:
         self._secret_key = secret_key
         self._algorithm = algorithm
 
-    def encode(self, subject: str, expire_delta: timedelta, **kwargs: Unpack[EncodeKwargs]) -> str:
+    def encode(self, subject: str, expire_delta: timedelta) -> str:
         expire = datetime.utcnow() + expire_delta
         to_encode = {
-            **kwargs,
             JWTKey.expire: expire,
             JWTKey.subject: subject,
         }

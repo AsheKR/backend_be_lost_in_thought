@@ -14,7 +14,6 @@ async def test_encode_and_decode():
     token = jwt_util.encode(
         subject="subject",
         expire_delta=timedelta(days=1),
-        id="id",
     )
 
     original = jwt_util.decode(
@@ -22,7 +21,6 @@ async def test_encode_and_decode():
     )
 
     assert_that(original.get("sub")).is_equal_to("subject")
-    assert_that(original.get("id")).is_equal_to("id")
 
 
 async def test_decode_fail_when_expired_signature_error():
@@ -34,7 +32,6 @@ async def test_decode_fail_when_expired_signature_error():
     token = jwt_util.encode(
         subject="subject",
         expire_delta=timedelta(),
-        id="id",
     )
 
     with freeze_time(datetime.utcnow() + timedelta(days=1)):
@@ -55,7 +52,6 @@ async def test_decode_with_ignore_expired():
     token = jwt_util.encode(
         subject="subject",
         expire_delta=timedelta(),
-        id="id",
     )
 
     with freeze_time(datetime.utcnow() + timedelta(days=1)):

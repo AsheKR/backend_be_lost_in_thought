@@ -1,16 +1,16 @@
-from fastapi.security import HTTPAuthorizationCredentials
 from api.router.auth.exception import AuthFailException, JWTDecodeAPIException, JWTExpiredAPIException
 from api.router.auth.request import LoginRequest, RefreshRequest
 from api.router.auth.response import LoginResponse
-from api.router.auth.security import AuthorizationHeader, get_authorization_credential
-from api.string import EndPoint
+from api.router.auth.string import AuthEndPoint
+from api.util import get_authorization_credential
 from core.config import get_config
 from core.db.session import get_session
 from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTUtil
 from domain.repository.user import UserRepository
 from domain.service.jwt import JWTSchema, JWTService
 from domain.service.user import UserService
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends
+from fastapi.security import HTTPAuthorizationCredentials
 from result import Err
 
 auth_router = APIRouter()
@@ -24,7 +24,7 @@ def _get_jwt_util() -> JWTUtil:
     )
 
 
-@auth_router.post(path=EndPoint.login)
+@auth_router.post(path=AuthEndPoint.login)
 async def login(request: LoginRequest) -> LoginResponse:
     session = get_session()
     user_repository = UserRepository(
@@ -32,7 +32,7 @@ async def login(request: LoginRequest) -> LoginResponse:
     )
     user_schema = await UserService(
         user_repository=user_repository,
-    ).find_first_by_external_id(external_id=str(request.external_id))
+    ).find_first_by_external_id(external_id=str(request.id))
     if not user_schema:
         raise AuthFailException
 
@@ -44,8 +44,10 @@ async def login(request: LoginRequest) -> LoginResponse:
     )
 
 
-@auth_router.post(path=EndPoint.refresh)
-async def refresh(request: RefreshRequest, credential: HTTPAuthorizationCredentials = Depends(get_authorization_credential)) -> LoginResponse:
+@auth_router.post(path=AuthEndPoint.refresh)
+async def refresh(
+    request: RefreshRequest, credential: HTTPAuthorizationCredentials = Depends(get_authorization_credential)
+) -> LoginResponse:
     jwt_util = _get_jwt_util()
     jwt_scheme_result = JWTService(
         jwt_util=jwt_util,

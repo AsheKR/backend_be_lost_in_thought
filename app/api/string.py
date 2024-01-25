@@ -1,12 +1,11 @@
 from enum import StrEnum
 
 
-class EndPoint(StrEnum):
+class RootEndPoint(StrEnum):
     docs = "/docs"
     redoc = "/redoc"
     auth = "/auth"
-    login = "/login"
-    refresh = "/refresh"
+    question = "/question"
 
 
 class APIDocString(StrEnum):

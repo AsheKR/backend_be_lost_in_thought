@@ -1,12 +1,12 @@
 import asyncio
 import logging
 import os
-from httpx import AsyncClient
 
 import pytest
 from api.server import fast_api
 from core.config import Env, EnvironmentKey, get_config
 from core.db.session import get_session
+from httpx import AsyncClient
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +28,7 @@ def logger():
 
 @pytest.fixture(scope="session")
 async def client():
-    async with AsyncClient(app=fast_api, base_url='http://test') as ac:
+    async with AsyncClient(app=fast_api, base_url="http://test") as ac:
         yield ac
 
 

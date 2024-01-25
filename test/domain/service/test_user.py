@@ -1,4 +1,5 @@
 from typing import Any
+
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
@@ -12,7 +13,9 @@ async def test_find_first_by_external_id():
         id=1,
         external_id=uuid4(),
     )
-    with patch("domain.repository.user.UserRepository.find_first_by_external_id", return_value=user_model) as find_first_by_external_id:
+    with patch(
+        "domain.repository.user.UserRepository.find_first_by_external_id", return_value=user_model
+    ) as find_first_by_external_id:
         user_repository = UserRepository(session=Any)
         user_service = UserService(user_repository=user_repository)
 
@@ -22,7 +25,9 @@ async def test_find_first_by_external_id():
 
 
 async def test_find_first_by_external_id_return_none_when_not_exist():
-    with patch("domain.repository.user.UserRepository.find_first_by_external_id", return_value=None) as find_first_by_external_id:
+    with patch(
+        "domain.repository.user.UserRepository.find_first_by_external_id", return_value=None
+    ) as find_first_by_external_id:
         user_repository = UserRepository(session=Any)
         user_service = UserService(user_repository=user_repository)
 

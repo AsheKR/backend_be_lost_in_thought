@@ -1,15 +1,10 @@
-from enum import StrEnum
+from typing import Any
 
 from core.config import get_config
-from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTUtil
+from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTKey, JWTUtil
 from domain.service.base import BaseService
 from pydantic import BaseModel
 from result import Err, Ok, Result
-
-
-class JWTSubjectKey(StrEnum):
-    access = "access"
-    refresh = "refresh"
 
 
 class JWTSchema(BaseModel):
@@ -21,10 +16,16 @@ class JWTService(BaseService):
     def __init__(self, jwt_util: JWTUtil):
         self._jwt_util = jwt_util
 
+    def decode_token(self, token: str) -> Result[dict[str, Any], JWTDecodeException | JWTExpiredException]:
+        try:
+            return Ok(self._jwt_util.decode(token=token))
+        except (JWTDecodeException, JWTExpiredException) as e:
+            return Err(e)
+
     def create(self, external_id: str) -> JWTSchema:
         return JWTSchema(
             access_token=self._create_access_token(external_id=external_id),
-            refresh_token=self._create_refresh_token(),
+            refresh_token=self._create_refresh_token(external_id=external_id),
         )
 
     def refresh(
@@ -45,7 +46,7 @@ class JWTService(BaseService):
             return Err(e)
 
         raw_access_token = self._jwt_util.decode(token=access_token, verify_exp=False)
-        external_id: str | None = raw_access_token.get("id")
+        external_id: str | None = raw_access_token.get(JWTKey.subject)
         if not external_id:
             return Err(JWTDecodeException())
 
@@ -58,14 +59,13 @@ class JWTService(BaseService):
     def _create_access_token(self, external_id: str) -> str:
         config = get_config()
         return self._jwt_util.encode(
-            subject=JWTSubjectKey.access,
+            subject=external_id,
             expire_delta=config.JWT_ACCESS_TOKEN_EXPIRE_DELTA,
-            id=external_id,
         )
 
-    def _create_refresh_token(self) -> str:
+    def _create_refresh_token(self, external_id: str) -> str:
         config = get_config()
         return self._jwt_util.encode(
-            subject=JWTSubjectKey.refresh,
+            subject=external_id,
             expire_delta=config.JWT_REFRESH_TOKEN_EXPIRE_DELTA,
         )

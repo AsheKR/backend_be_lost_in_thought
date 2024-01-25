@@ -28,7 +28,7 @@ async def test_create():
 async def test_refresh():
     with patch(
         target="core.util.jwt.JWTUtil.decode",
-        side_effect=[JWTExpiredException(), {}, {"id": "external_id"}],
+        side_effect=[JWTExpiredException(), {}, {"sub": "external_id"}],
     ) as decode:
         with patch(
             target="core.util.jwt.JWTUtil.encode",

@@ -1,10 +1,10 @@
 from domain.repository.user import UserModel, UserRepository
 from domain.service.base import BaseService
 from pydantic import UUID4, BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 
 class UserSchema(BaseModel):
+    id: int
     external_id: UUID4
 
 
@@ -19,6 +19,7 @@ class UserService(BaseService):
             return None
 
         return UserSchema(
+            id=user_model.id,
             external_id=user_model.external_id,
         )
 
