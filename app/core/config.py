@@ -54,7 +54,7 @@ def get_config() -> Config:
         Env.local: LocalConfig,
         Env.development: DevelopmentConfig,
         Env.production: ProductionConfig,
-    }[Env[os.getenv(EnvironmentKey.env)]]()
+    }[Env[os.getenv(EnvironmentKey.env, default=Env.local)]]()
     if config.ENV == Env.local:
         print(f"config : {config}")
 
