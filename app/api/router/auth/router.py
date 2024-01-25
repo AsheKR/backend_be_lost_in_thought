@@ -2,6 +2,7 @@ from api.router.auth.exception import AuthFailException, JWTDecodeAPIException, 
 from api.router.auth.request import LoginRequest, RefreshRequest
 from api.router.auth.response import LoginResponse
 from api.router.auth.string import AuthEndPoint
+from api.router.depdendency import get_jwt_service, get_user_service
 from api.util import AuthorizationCredential
 from core.config import get_config
 from core.db.session import get_session
@@ -12,35 +13,22 @@ from domain.service.user import UserService
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from result import Err
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 auth_router = APIRouter()
-
-
-def _get_jwt_util() -> JWTUtil:
-    config = get_config()
-    return JWTUtil(
-        secret_key=config.JWT_SECRET_KEY,
-        algorithm=config.JWT_ALGORITHM,
-    )
 
 
 @auth_router.post(path=AuthEndPoint.login)
 async def login(
     request: LoginRequest,
-    session: AsyncSession = Depends(get_session),
+    jwt_service: JWTService = Depends(get_jwt_service),
+    user_service: UserService = Depends(get_user_service),
 ) -> LoginResponse:
-    user_repository = UserRepository(
-        session=session,
-    )
-    user_schema = await UserService(
-        user_repository=user_repository,
-    ).find_first_by_external_id(external_id=str(request.id))
+    user_schema = await user_service.find_first_by_external_id(external_id=str(request.id))
     if not user_schema:
         raise AuthFailException
 
-    jwt_util = _get_jwt_util()
-    jwt_schema = JWTService(jwt_util=jwt_util).create(external_id=str(user_schema.external_id))
+    jwt_schema = jwt_service.create(external_id=str(user_schema.external_id))
     return LoginResponse(
         access_token=jwt_schema.access_token,
         refresh_token=jwt_schema.refresh_token,
@@ -51,22 +39,20 @@ async def login(
 async def refresh(
     request: RefreshRequest,
     credential: HTTPAuthorizationCredentials = Depends(AuthorizationCredential(auto_error=True)),
+    jwt_service: JWTService = Depends(get_jwt_service),
 ) -> LoginResponse:
-    jwt_util = _get_jwt_util()
-    jwt_scheme_result = JWTService(
-        jwt_util=jwt_util,
-    ).refresh(
+    jwt_schema_result = jwt_service.refresh(
         access_token=credential.credentials,
         refresh_token=request.refresh_token,
     )
-    match jwt_scheme_result:
+    match jwt_schema_result:
         case Err(exception):
             match exception:
                 case JWTDecodeException():
                     raise JWTDecodeAPIException
                 case JWTExpiredException():
                     raise JWTExpiredAPIException
-    jwt_schema: JWTSchema = jwt_scheme_result.ok_value
+    jwt_schema: JWTSchema = jwt_schema_result.ok_value
     return LoginResponse(
         access_token=jwt_schema.access_token,
         refresh_token=jwt_schema.refresh_token,

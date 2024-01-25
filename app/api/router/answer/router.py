@@ -4,6 +4,7 @@ from api.exception import UnprocessableEntity
 from api.router.answer.request import AddAnswerRequest, EditAnswerRequest
 from api.router.answer.response import AnswerResponse
 from api.router.answer.string import AnswerDetailEndPoint, AnswerEndPoint
+from api.router.depdendency import get_answer_service, get_question_service
 from api.util import get_current_user
 from core.db.session import get_session
 from domain.repository.answer import AnswerRepository
@@ -27,14 +28,8 @@ async def list(
     limit: int = 20,
     offset: int = 0,
     user: UserSchema = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    answer_service: AnswerService = Depends(get_answer_service),
 ) -> List[AnswerResponse]:
-    answer_repository = AnswerRepository(
-        session=session,
-    )
-    answer_service = AnswerService(
-        answer_repository=answer_repository,
-    )
     answer_list = await answer_service.list(
         question_external_id=str(question_id),
         user_id=user.id,
@@ -56,20 +51,9 @@ async def add(
     request: AddAnswerRequest,
     user: UserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
+    answer_service: AnswerService = Depends(get_answer_service),
+    question_service: QuestionService = Depends(get_question_service),
 ) -> None:
-    question_repository = QuestionRepository(
-        session=session,
-    )
-    answer_repository = AnswerRepository(
-        session=session,
-    )
-    question_service = QuestionService(
-        question_repository=question_repository,
-    )
-    answer_service = AnswerService(
-        answer_repository=answer_repository,
-    )
-
     question_schema = await question_service.find_first_by_external_id(external_id=str(question_id))
     if not question_schema:
         raise UnprocessableEntity
@@ -89,14 +73,8 @@ async def edit(
     request: EditAnswerRequest,
     user: UserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
+    answer_service: AnswerService = Depends(get_answer_service),
 ) -> None:
-    answer_repository = AnswerRepository(
-        session=session,
-    )
-    answer_service = AnswerService(
-        answer_repository=answer_repository,
-    )
-
     result = await answer_service.edit(
         answer_external_id=str(answer_id),
         user_id=user.id,
@@ -117,14 +95,8 @@ async def delete(
     answer_id: UUID4,
     user: UserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
+    answer_service: AnswerService = Depends(get_answer_service),
 ) -> None:
-    answer_repository = AnswerRepository(
-        session=session,
-    )
-    answer_service = AnswerService(
-        answer_repository=answer_repository,
-    )
-
     result = await answer_service.delete(
         answer_external_id=str(answer_id),
         user_id=user.id,
