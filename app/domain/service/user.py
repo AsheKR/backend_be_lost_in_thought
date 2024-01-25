@@ -15,7 +15,7 @@ class UserService(BaseService):
     async def find_first_by_external_id(self, external_id: str) -> UserSchema | None:
         user_model = await self._user_repository.find_first_by_external_id(external_id=external_id)
         if not user_model:
-            return
+            return None
 
         return UserSchema(
             external_id=user_model.external_id,

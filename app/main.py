@@ -15,7 +15,7 @@ from core.config import Env, EnvironmentKey, get_config
     "--debug",
     type=click.BOOL,
 )
-def main(env: str, debug: bool | None):
+def main(env: str, debug: bool | None) -> None:
     os.environ[EnvironmentKey.env] = env
     if debug is not None:
         os.environ[EnvironmentKey.debug] = str(debug)

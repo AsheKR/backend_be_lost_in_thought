@@ -4,15 +4,16 @@ from api.string import APIDocString, EndPoint
 from core.config import Env, get_config
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
+from starlette.responses import JSONResponse
 
 
-def _init_router(fast_api_: FastAPI):
+def _init_router(fast_api_: FastAPI) -> None:
     fast_api_.include_router(auth_router, prefix=EndPoint.auth)
 
 
-def _init_listener(fast_api_: FastAPI):
+def _init_listener(fast_api_: FastAPI) -> None:
     @fast_api_.exception_handler(APIException)
-    async def custom_exception_handler(request: Request, exc: APIException):
+    async def custom_exception_handler(request: Request, exc: APIException) -> JSONResponse:
         return ORJSONResponse(
             status_code=exc.status_code,
             content=APIExceptionSchema(
@@ -26,7 +27,7 @@ def create_fast_api() -> FastAPI:
     config = get_config()
 
     fast_api_ = FastAPI(
-        title=APIDocString.title,
+        title=APIDocString.label,
         description=APIDocString.description,
         version=APIDocString.version,
         docs_url=None if config.ENV == Env.production else EndPoint.docs,

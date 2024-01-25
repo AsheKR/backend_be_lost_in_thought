@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 from core.config import get_config
-from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTKey, JWTUtil
+from core.util.jwt import JWTDecodeException, JWTExpiredException, JWTUtil
 from domain.service.base import BaseService
 from pydantic import BaseModel
 from result import Err, Ok, Result
@@ -38,11 +38,13 @@ class JWTService(BaseService):
 
         try:
             JWTUtil.decode(token=refresh_token)
-        except [JWTDecodeException, JWTExpiredException] as e:
+        except (JWTDecodeException, JWTExpiredException) as e:
             return Err(e)
 
         raw_access_token = JWTUtil.decode(token=access_token, verify_exp=False)
-        external_id: str = raw_access_token.get(JWTKey.subject)
+        external_id: str | None = raw_access_token.get("id")
+        if not external_id:
+            return Err(JWTDecodeException())
 
         return Ok(
             self.create(
@@ -69,5 +71,5 @@ class JWTService(BaseService):
         try:
             JWTUtil.decode(token=token)
             return Ok(None)
-        except [JWTDecodeException, JWTExpiredException] as e:
+        except (JWTDecodeException, JWTExpiredException) as e:
             return Err(e)

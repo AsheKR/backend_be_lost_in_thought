@@ -50,11 +50,35 @@ class LocalConfig(Config):
 class DevelopmentConfig(Config):
     ENV: str = Env.development
     DEBUG: bool = True
+    SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
+        scheme="postgresql+asyncpg",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend",
+        port=5678,
+    )
+    JWT_SECRET_KEY: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta = timedelta(hours=7)
+    JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta = timedelta(days=7)
 
 
 class ProductionConfig(Config):
     ENV: str = Env.production
     DEBUG: bool = False
+    SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
+        scheme="postgresql+asyncpg",
+        username="backend",
+        password="backend",
+        host="localhost",
+        path="backend",
+        port=5678,
+    )
+    JWT_SECRET_KEY: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_DELTA: timedelta = timedelta(hours=7)
+    JWT_REFRESH_TOKEN_EXPIRE_DELTA: timedelta = timedelta(days=7)
 
 
 @lru_cache

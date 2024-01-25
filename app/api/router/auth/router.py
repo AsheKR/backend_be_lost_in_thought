@@ -14,7 +14,7 @@ auth_router = APIRouter()
 
 @auth_router.post(path=EndPoint.login)
 async def login(request: LoginRequest) -> LoginResponse:
-    user_schema = await UserService().find_first_by_external_id(external_id=request.external_id)
+    user_schema = await UserService().find_first_by_external_id(external_id=str(request.external_id))
     if not user_schema:
         raise AuthFailException
 

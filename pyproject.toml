@@ -18,6 +18,7 @@ greenlet = "^2.0.2"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 orjson = "^3.9.5"
 result = "^0.13.1"
+mypy = "^1.5.1"
 
 
 [tool.poetry.group.local.dependencies]
@@ -56,3 +57,31 @@ color_output = true
 [tool.flake8]
 ignore = ["E501", "W503", "E203"]
 exclude = [".git", "__init__.py"]
+
+[tool.mypy]
+# https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
+plugins = ["pydantic.mypy"]
+python_version = 3.11
+pretty = true
+show_traceback = true
+color_output = true
+
+enable_incomplete_feature = "Unpack"
+allow_redefinition = false
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+implicit_reexport = false
+no_implicit_optional = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+strict_equality = true
+strict_optional = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
