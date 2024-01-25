@@ -47,3 +47,21 @@ async def test_register(session: AsyncSession):
 
     assert_that(user_model).is_not_none()
     assert_that(user_model.external_id).is_equal_to(result.external_id)
+
+
+async def test_delete(session: AsyncSession):
+    user_repository = UserRepository(session=session)
+    user_model = UserModel()
+    session.add(
+        instance=user_model,
+    )
+    await session.commit()
+    await user_repository.delete(
+        user_model=user_model
+    )
+    await session.commit()
+
+    result = await session.scalar(select(UserModel).where(UserModel.id == user_model.id))
+
+    assert_that(result).is_not_none()
+    assert_that(result.delete_datetime).is_not_none()

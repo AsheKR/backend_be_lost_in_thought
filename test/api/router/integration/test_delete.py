@@ -50,6 +50,11 @@ async def test_delete_all(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
 
+    user_model = await session.scalar(select(UserModel))
+
+    assert_that(user_model).is_not_none()
+    assert_that(user_model.delete_datetime).is_not_none()
+
     scalar_result = await session.scalars(select(AnswerModel))
     result = scalar_result.all()
 
@@ -112,12 +117,22 @@ async def test_delete_all_only_specific_user(
 
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
 
+    user_model_result = await session.scalar(select(UserModel).where(UserModel.id == user_model.id))
+
+    assert_that(user_model_result).is_not_none()
+    assert_that(user_model_result.delete_datetime).is_not_none()
+
     scalar_result = await session.scalars(select(AnswerModel).where(AnswerModel.user_id == user_model.id))
     result = scalar_result.all()
 
     assert_that(result).is_length(2)
     assert_that(result[0].delete_datetime).is_not_none()
     assert_that(result[1].delete_datetime).is_not_none()
+
+    user_model2_result = await session.scalar(select(UserModel).where(UserModel.id == user_model2.id))
+
+    assert_that(user_model2_result).is_not_none()
+    assert_that(user_model2_result.delete_datetime).is_none()
 
     scalar_result = await session.scalars(select(AnswerModel).where(AnswerModel.user_id == user_model2.id))
     result = scalar_result.all()

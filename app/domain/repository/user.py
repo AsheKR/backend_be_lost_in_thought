@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.db.model import BaseModel
 from domain.datasource.user import UserModel
 from domain.repository.base import BaseRepository
@@ -14,3 +16,7 @@ class UserRepository(BaseRepository):
         self._session.add(user_model)
         await self._session.flush()
         return user_model
+
+    async def delete(self, user_model: UserModel):
+        user_model.delete_datetime = datetime.now()
+        self._session.add(user_model)
