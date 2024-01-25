@@ -30,7 +30,7 @@ class AnswerRepository(BaseRepository):
             )
             .limit(limit=limit)
             .offset(offset=offset)
-            .order_by(AnswerModel.id)
+            .order_by(AnswerModel.id.desc())
         )
         scalar_result = await self._session.scalars(query)
         result = scalar_result.all()

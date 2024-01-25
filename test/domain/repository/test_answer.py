@@ -69,8 +69,8 @@ async def test_answer_pagination(session: AsyncSession):
         offset=0,
     )
     assert_that(answer_list).is_length(2)
-    assert_that(answer_list[0].id).is_equal_to(answer_model1.id)
-    assert_that(answer_list[1].id).is_equal_to(answer_model2.id)
+    assert_that(answer_list[0].id).is_equal_to(answer_model6.id)
+    assert_that(answer_list[1].id).is_equal_to(answer_model5.id)
 
     answer_list = await answer_repository.list(
         question_external_id=question_model.external_id,
@@ -79,8 +79,8 @@ async def test_answer_pagination(session: AsyncSession):
         offset=2,
     )
     assert_that(answer_list).is_length(2)
-    assert_that(answer_list[0].id).is_equal_to(answer_model3.id)
-    assert_that(answer_list[1].id).is_equal_to(answer_model4.id)
+    assert_that(answer_list[0].id).is_equal_to(answer_model4.id)
+    assert_that(answer_list[1].id).is_equal_to(answer_model3.id)
 
     answer_list = await answer_repository.list(
         question_external_id=question_model.external_id,
@@ -89,8 +89,8 @@ async def test_answer_pagination(session: AsyncSession):
         offset=4,
     )
     assert_that(answer_list).is_length(2)
-    assert_that(answer_list[0].id).is_equal_to(answer_model5.id)
-    assert_that(answer_list[1].id).is_equal_to(answer_model6.id)
+    assert_that(answer_list[0].id).is_equal_to(answer_model2.id)
+    assert_that(answer_list[1].id).is_equal_to(answer_model1.id)
 
     answer_list = await answer_repository.list(
         question_external_id=question_model.external_id,
@@ -144,8 +144,8 @@ async def test_answer_list_exclude_deleted(session: AsyncSession):
         offset=0,
     )
     assert_that(answer_list).is_length(2)
-    assert_that(answer_list[0].id).is_equal_to(answer_model1.id)
-    assert_that(answer_list[1].id).is_equal_to(answer_model2.id)
+    assert_that(answer_list[0].id).is_equal_to(answer_model2.id)
+    assert_that(answer_list[1].id).is_equal_to(answer_model1.id)
 
 
 async def test_add(session: AsyncSession):
