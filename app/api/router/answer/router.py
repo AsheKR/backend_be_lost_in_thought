@@ -11,7 +11,7 @@ from domain.service.answer import AnswerService
 from domain.service.exception import DoesNotExist
 from domain.service.question import QuestionService
 from domain.service.user import InternalUserSchema
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import UUID4
 from result import Err
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,7 +23,7 @@ answer_router = APIRouter()
 @answer_router.get(path=AnswerEndPoint.list)
 async def _list(
     question_id: UUID4,
-    limit: int = 20,
+    limit: int = Query(default=20, lt=21),
     offset: int = 0,
     user: InternalUserSchema = Depends(get_current_user),
     answer_service: AnswerService = Depends(get_answer_service),

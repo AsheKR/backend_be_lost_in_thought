@@ -36,11 +36,19 @@ class QuestionService(BaseService):
         )
 
     async def answered_list(
-        self, user_id: int, language_code: SupportLanguage, limit: int, offset: int
+        self,
+            user_id: int,
+            language_code: SupportLanguage,
+            start_datetime: datetime,
+            end_datetime: datetime,
+            limit: int,
+            offset: int,
     ) -> list[AnsweredQuestionSchema]:
         question_list = await self._question_repository.answered_list(
             user_id=user_id,
             language_code=language_code,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
             limit=limit,
             offset=offset,
         )

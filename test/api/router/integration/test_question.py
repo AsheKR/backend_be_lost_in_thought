@@ -1,15 +1,14 @@
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from assertpy import assert_that
-from core.config import get_config
 from core.language import SupportLanguage
-from core.util.jwt import JWTUtil
 from domain.datasource.answer import AnswerModel
 from domain.datasource.language import LanguageModel
 from domain.datasource.question import QuestionTranslationModel
 from domain.repository.question import QuestionModel, SuggestedQuestionModel
 from domain.repository.user import UserModel
-from domain.service.jwt import JWTSchema, JWTService
+from domain.service.jwt import JWTSchema
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -228,7 +227,7 @@ async def test_answered_question_list(
     await session.commit()
 
     response = await client.get(
-        url="/question/answered?limit=2&offset=0",
+        url=f"/question/answered?limit=2&offset=0&start_datetime={answer_model1.create_datetime}&end_datetime={answer_model3.create_datetime}",
         headers={
             "Authorization": f"JWT {jwt_schema.access_token}",
         },
@@ -236,15 +235,15 @@ async def test_answered_question_list(
     assert_that(response.status_code).is_equal_to(HTTPStatus.OK)
     response_data = response.json()
 
-    assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(question_model3.external_id))
     assert_that(response_data[0]["answer_count"]).is_equal_to(1)
-    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model1.create_datetime.isoformat())
+    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model3.create_datetime.isoformat())
     assert_that(response_data[1]["id"]).is_equal_to(str(question_model2.external_id))
     assert_that(response_data[1]["answer_count"]).is_equal_to(1)
     assert_that(response_data[1]["answer_datetime"]).is_equal_to(answer_model2.create_datetime.isoformat())
 
     response = await client.get(
-        url="/question/answered?limit=2&offset=2",
+        url=f"/question/answered?limit=2&offset=2&start_datetime={answer_model1.create_datetime}&end_datetime={answer_model3.create_datetime}",
         headers={
             "Authorization": f"JWT {jwt_schema.access_token}",
         },
@@ -253,12 +252,12 @@ async def test_answered_question_list(
     response_data = response.json()
 
     assert_that(response_data).is_length(1)
-    assert_that(response_data[0]["id"]).is_equal_to(str(question_model3.external_id))
+    assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))
     assert_that(response_data[0]["answer_count"]).is_equal_to(1)
-    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model3.create_datetime.isoformat())
+    assert_that(response_data[0]["answer_datetime"]).is_equal_to(answer_model1.create_datetime.isoformat())
 
     response = await client.get(
-        url="/question/answered?limit=2&offset=4",
+        url=f"/question/answered?limit=2&offset=4&start_datetime={answer_model1.create_datetime}&end_datetime={answer_model3.create_datetime}",
         headers={
             "Authorization": f"JWT {jwt_schema.access_token}",
         },
@@ -315,7 +314,7 @@ async def test_answered_question_list_only_given_user(
     await session.commit()
 
     response = await client.get(
-        url="/question/answered",
+        url=f"/question/answered?start_datetime={answer_model1.create_datetime}&end_datetime={answer_model2.create_datetime}",
         headers={
             "Authorization": f"JWT {jwt_schema.access_token}",
         },
@@ -325,3 +324,17 @@ async def test_answered_question_list_only_given_user(
 
     assert_that(response_data).is_length(1)
     assert_that(response_data[0]["id"]).is_equal_to(str(question_model1.external_id))
+
+
+async def test_unprocessable_entity_answered_question_list_over_31_day(
+    client: AsyncClient, jwt_schema: JWTSchema,
+):
+    now = datetime.now()
+    next_32_day = now + timedelta(days=32)
+    response = await client.get(
+        url=f"/question/answered?start_datetime={now}&end_datetime={next_32_day}",
+        headers={
+            "Authorization": f"JWT {jwt_schema.access_token}",
+        },
+    )
+    assert_that(response.status_code).is_equal_to(HTTPStatus.UNPROCESSABLE_ENTITY)

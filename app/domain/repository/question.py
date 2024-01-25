@@ -28,7 +28,13 @@ class QuestionRepository(BaseRepository):
         return await self._session.scalar(query)  # type: ignore
 
     async def answered_list(
-        self, user_id: int, language_code: SupportLanguage, limit: int, offset: int
+        self,
+            user_id: int,
+            language_code: SupportLanguage,
+            start_datetime: datetime,
+            end_datetime: datetime,
+            limit: int,
+            offset: int,
     ) -> list[AnsweredQuestion]:
         answered_subquery = (
             select(
@@ -70,8 +76,10 @@ class QuestionRepository(BaseRepository):
                 AnswerModel.delete_datetime == None,
                 AnswerModel.user_id == user_id,
                 LanguageModel.code == language_code.value,
+                AnswerModel.create_datetime >= start_datetime,
+                AnswerModel.create_datetime <= end_datetime,
             )
-            .order_by(AnswerModel.id)
+            .order_by(AnswerModel.id.desc())
             .limit(limit=limit)
             .offset(offset=offset)
         )

@@ -288,21 +288,30 @@ async def test_answered_question_list(session: AsyncSession):
         session=session,
     )
     question_list = await question_repository.answered_list(
-        user_id=user_model.id, language_code=SupportLanguage.en, limit=2, offset=0
+        user_id=user_model.id,
+        language_code=SupportLanguage.en,
+        start_datetime=answer_model1.create_datetime,
+        end_datetime=answer_model3.create_datetime,
+        limit=2,
+        offset=0,
     )
 
-    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
+    assert_that(question_list[0].external_id).is_equal_to(question_model3.external_id)
     assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
 
     question_list = await question_repository.answered_list(
-        user_id=user_model.id, language_code=SupportLanguage.en, limit=2, offset=2
+        user_id=user_model.id, language_code=SupportLanguage.en, limit=2, offset=2,
+    start_datetime = answer_model1.create_datetime,
+    end_datetime = answer_model3.create_datetime,
     )
 
     assert_that(question_list).is_length(1)
-    assert_that(question_list[0].external_id).is_equal_to(question_model3.external_id)
+    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
 
     question_list = await question_repository.answered_list(
-        user_id=user_model.id, language_code=SupportLanguage.en, limit=2, offset=4
+        user_id=user_model.id, language_code=SupportLanguage.en, limit=2, offset=4,
+    start_datetime = answer_model1.create_datetime,
+    end_datetime = answer_model3.create_datetime,
     )
 
     assert_that(question_list).is_empty()
@@ -356,6 +365,8 @@ async def test_answered_question_answer_datetime(session: AsyncSession):
     question_list = await question_repository.answered_list(
         user_id=user_model.id,
         language_code=SupportLanguage.en,
+        start_datetime=answer_model1.create_datetime,
+        end_datetime=answer_model3.create_datetime,
         limit=3,
         offset=0
     )
@@ -414,6 +425,8 @@ async def test_answered_question_answer_count(session: AsyncSession):
     question_list = await question_repository.answered_list(
         user_id=user_model.id,
         language_code=SupportLanguage.en,
+        start_datetime=answer_model1.create_datetime,
+        end_datetime=answer_model3.create_datetime,
         limit=3,
         offset=0
     )
@@ -476,6 +489,8 @@ async def test_answered_question_list_only_given_user(session: AsyncSession):
     question_list = await question_repository.answered_list(
         user_id=user_model1.id,
         language_code=SupportLanguage.en,
+        start_datetime=answer_model1.create_datetime,
+        end_datetime=answer_model2.create_datetime,
         limit=2,
         offset=0,
     )
@@ -546,12 +561,14 @@ async def test_answered_question_list_exclude_deleted_answer(session: AsyncSessi
         session=session,
     )
     question_list = await question_repository.answered_list(
-        user_id=user_model.id, language_code=SupportLanguage.en, limit=3, offset=0
+        user_id=user_model.id, language_code=SupportLanguage.en, limit=3, offset=0,
+    start_datetime = answer_model1.create_datetime,
+    end_datetime = answer_model3.create_datetime,
     )
 
     assert_that(question_list).is_length(2)
-    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
-    assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
+    assert_that(question_list[0].external_id).is_equal_to(question_model2.external_id)
+    assert_that(question_list[1].external_id).is_equal_to(question_model1.external_id)
 
 
 async def test_answered_question_list_include_deleted_question(session: AsyncSession):
@@ -617,10 +634,12 @@ async def test_answered_question_list_include_deleted_question(session: AsyncSes
         session=session,
     )
     question_list = await question_repository.answered_list(
-        user_id=user_model.id, language_code=SupportLanguage.en, limit=3, offset=0
+        user_id=user_model.id, language_code=SupportLanguage.en, limit=3, offset=0,
+    start_datetime = answer_model1.create_datetime,
+    end_datetime = answer_model3.create_datetime,
     )
 
     assert_that(question_list).is_length(3)
-    assert_that(question_list[0].external_id).is_equal_to(question_model1.external_id)
+    assert_that(question_list[0].external_id).is_equal_to(question_model3.external_id)
     assert_that(question_list[1].external_id).is_equal_to(question_model2.external_id)
-    assert_that(question_list[2].external_id).is_equal_to(question_model3.external_id)
+    assert_that(question_list[2].external_id).is_equal_to(question_model1.external_id)
