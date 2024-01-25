@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    volumes:
+      - backend:/var/lib/postgresql/data/
+    ports:
+      - 5678:5432
+    environment:
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=backend
+      - POSTGRES_DB=backend
+
+volumes:
+  backend:

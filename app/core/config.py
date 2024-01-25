@@ -2,6 +2,7 @@ import os
 from enum import StrEnum
 from functools import lru_cache
 
+from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
@@ -21,11 +22,15 @@ class Config(BaseSettings):
     DEBUG: bool
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
+    SQLALCHEMY_DATABASE_URI: PostgresDsn
 
 
 class LocalConfig(Config):
     ENV: str = Env.local
     DEBUG: bool = True
+    SQLALCHEMY_DATABASE_URI: PostgresDsn = PostgresDsn.build(
+        scheme="postgresql", username="backend", password="backend", host="localhost", path="backend", port=5678
+    )
 
 
 class DevelopmentConfig(Config):
@@ -40,8 +45,12 @@ class ProductionConfig(Config):
 
 @lru_cache
 def get_config() -> Config:
-    return {
-        Env.local: LocalConfig(),
-        Env.development: DevelopmentConfig(),
-        Env.production: ProductionConfig(),
-    }[Env[os.getenv(EnvironmentKey.env)]]
+    config = {
+        Env.local: LocalConfig,
+        Env.development: DevelopmentConfig,
+        Env.production: ProductionConfig,
+    }[Env[os.getenv(EnvironmentKey.env)]]()
+    if config.ENV == Env.local:
+        print(f"config : {config}")
+
+    return config
